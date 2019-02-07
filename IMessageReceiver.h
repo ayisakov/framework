@@ -20,8 +20,8 @@ class IMessageReceiver {
      * @param [in] message the message
      * @return 0 on success
      */
-    virtual int send(const &IMessage message) = 0;
-}
+    virtual int send(const IMessage &message) = 0;
+};
 } // namespace framework
 } // namespace lustiglab
 } // namespace neu

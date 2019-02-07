@@ -10,13 +10,18 @@
 
 #include <string>
 
-namespace neu {
-namespace lustiglab {
-namespace framework {
-class IMessage {
+namespace neu
+{
+namespace lustiglab
+{
+namespace framework
+{
+class IMessage
+{
+  public:
     IMessage() {}
-    virtual const std::string &toString() = 0;
-    virtual ~IMessage() = 0;
+    virtual std::string toString() const = 0;
+    virtual ~IMessage(){};
 };
 
 } // namespace framework
