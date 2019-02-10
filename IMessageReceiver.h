@@ -2,16 +2,18 @@
 #define IMESSAGE_RECEIVER_H
 
 
-#include "IMessage.h"
-
-namespace neu {
-namespace lustiglab {
-namespace framework {
+namespace neu
+{
+namespace lustiglab
+{
+namespace framework
+{
 /**
  * The message receiver interface.
  * All classes capable of receiving messages should inherit it.
  */
-class IMessageReceiver {
+template <typename T> class IMessageReceiver
+{
   public:
     IMessageReceiver() {}
     virtual ~IMessageReceiver() {}
@@ -20,7 +22,7 @@ class IMessageReceiver {
      * @param [in] message the message
      * @return 0 on success
      */
-    virtual int send(const IMessage &message) = 0;
+    virtual int send(const T &message) = 0;
 };
 } // namespace framework
 } // namespace lustiglab
