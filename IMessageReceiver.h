@@ -2,9 +2,7 @@
 #define IMESSAGE_RECEIVER_H
 
 
-namespace neu
-{
-namespace lustiglab
+namespace ayisakov
 {
 namespace framework
 {
@@ -22,10 +20,9 @@ template <typename T> class IMessageReceiver
      * @param [in] message the message
      * @return 0 on success
      */
-    virtual int send(const T &message) = 0;
+    virtual int send(T &&message) = 0;
 };
 } // namespace framework
-} // namespace lustiglab
-} // namespace neu
+} // namespace ayisakov
 
 #endif // IMESSAGE_RECEIVER_H

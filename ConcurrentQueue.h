@@ -10,9 +10,7 @@
 #include <queue>
 #include <thread>
 
-namespace neu
-{
-namespace lustiglab
+namespace ayisakov
 {
 namespace framework
 {
@@ -23,10 +21,10 @@ namespace framework
 template <typename T> class ConcurrentQueue
 {
   public:
-    ConcurrentQueue();
-    virtual ~ConcurrentQueue();
+    ConcurrentQueue() {}
+    virtual ~ConcurrentQueue() {}
     // Push an item into the queue
-    void push(const T &&item)
+    void push(T &&item)
     {
         std::unique_lock<std::mutex> lock(m_mutex);
         m_queue.push(std::move(item));
@@ -59,7 +57,6 @@ template <typename T> class ConcurrentQueue
     std::condition_variable m_cond;
 };
 } // namespace framework
-} // namespace lustiglab
-} // namespace neu
+} // namespace ayisakov
 
 #endif // CONCURRENTQUEUE_H

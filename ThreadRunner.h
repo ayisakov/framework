@@ -13,27 +13,27 @@ class ThreadRunner : public IAsyncRunner
 {
   public:
     ThreadRunner(IRunnable &task);
-    virtual ~ThreadRunner(); // TODO: make sure to request termination and join the thread here
+    virtual ~ThreadRunner();
     /**
      * Launch asynchronously, and do not block once started.
      *
      * @return 0 if launched successfully; nonzero value otherwise.
      */
-    virtual int launch();
+    virtual int launch() override;
     /**
      * Block here until asynchronous execution has finished (join the thread).
      * Returns immediately if no task is running at the time of the call.
      *
      * @return last exit code or 0 if no task was run
      */
-    virtual int waitExit();
+    virtual int waitExit() override;
     /**
      * Returns true if the task is running.
      */
-    virtual bool running();
+    virtual bool running() override;
 
   protected:
-    virtual int run();
+    virtual int run() override;
 
   private:
     std::thread m_thread;
