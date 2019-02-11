@@ -40,8 +40,11 @@ class SimpleEventApp : public IRunnable, public IMessageReceiver<TEvent>
         return 0;
     }
 
+    virtual void terminate() override { m_run = false; }
+
   protected:
-    virtual void process(const TEvent &event) {
+    virtual void process(const TEvent &event)
+    {
         // TODO: implement
     }
 

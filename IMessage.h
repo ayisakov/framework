@@ -10,9 +10,7 @@
 
 #include <string>
 
-namespace neu
-{
-namespace lustiglab
+namespace ayisakov
 {
 namespace framework
 {
@@ -25,7 +23,6 @@ class IMessage
 };
 
 } // namespace framework
-} // namespace lustiglab
-} // namespace neu
+} // namespace ayisakov
 
 #endif // IMESSAGE_H
