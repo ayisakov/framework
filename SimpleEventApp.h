@@ -34,7 +34,7 @@ class SimpleEventApp : public IRunnable, public IMessageReceiver<TEvent>
      * @param [in] message the message
      * @return 0 on success
      */
-    virtual int send(TEvent &&message) override
+    virtual int send(TEvent &message) override
     {
         m_queue.push(std::move(message));
         return 0;

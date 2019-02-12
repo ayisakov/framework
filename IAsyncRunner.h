@@ -1,7 +1,6 @@
 #ifndef IASYNCRUNNER_H
 #define IASYNCRUNNER_H
 
-#include <function>
 #include "IRunnable.h"
 
 namespace ayisakov

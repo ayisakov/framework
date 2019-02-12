@@ -4,7 +4,7 @@ using ayisakov::framework::IRunnable;
 using ayisakov::framework::ThreadRunner;
 
 ayisakov::framework::ThreadRunner::ThreadRunner(IRunnable &task)
-: m_task(task), m_running(false), m_retval(0)
+: IAsyncRunner(task), m_running(false), m_retval(0)
 {
 }
 
@@ -17,7 +17,7 @@ int ayisakov::framework::ThreadRunner::launch()
 {
     if(running()) return 0;
 
-    m_thread = std::thread(&IThreadRunner::run, std::ref(*this));
+    m_thread = std::thread(&ThreadRunner::run, std::ref(*this));
     if(!m_thread.joinable()) return -1;
 
     return 0;
@@ -40,6 +40,12 @@ int ayisakov::framework::ThreadRunner::run()
 
 int ayisakov::framework::ThreadRunner::waitExit()
 {
+    if (!m_thread.joinable()) {
+        if (m_running) {
+            return -1; // running but not joinable is an error condition
+        }
+        return m_retval; // already ended
+    }
     task().terminate();
     m_thread.join();
     return m_retval;

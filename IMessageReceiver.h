@@ -20,7 +20,7 @@ template <typename T> class IMessageReceiver
      * @param [in] message the message
      * @return 0 on success
      */
-    virtual int send(T &&message) = 0;
+    virtual int send(T &message) = 0;
 };
 } // namespace framework
 } // namespace ayisakov
