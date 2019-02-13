@@ -13,6 +13,10 @@ class MsgSample : public IAppMessage
     MsgSample() {}
     virtual ~MsgSample() {}
     virtual void examine(ITestApp &reader) const override;
+    virtual std::string toString() const override
+    {
+        return "Sample message";
+    }
 };
 
 class MsgQuit : public IAppMessage
@@ -21,6 +25,10 @@ class MsgQuit : public IAppMessage
     MsgQuit() {}
     virtual ~MsgQuit() {}
     virtual void examine(ITestApp &reader) const override;
+    virtual std::string toString() const override
+    {
+        return "Quit message";
+    }
 };
 } // namespace framework
 } // namespace ayisakov
