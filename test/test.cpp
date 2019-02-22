@@ -9,6 +9,8 @@
 #include "../ThreadRunner.h"
 #include "TestApp.h"
 #include "TestMessages.h"
+#include "../IOProvider.h"
+#include "../ISerialPort.h"
 
 typedef std::unique_ptr<std::string> TestMessage;
 
@@ -165,6 +167,25 @@ TEST_F(SimpleEventAppTest, Logging)
         ++it_exp;
         ++it_read;
     }
+}
+
+TEST_F(SimpleEventAppTest, IOProviderInstantiation)
+{
+    ayisakov::framework::IOProvider provider;
+}
+
+TEST_F(SimpleEventAppTest, IOProviderSerialPortCreation)
+{
+    ayisakov::framework::IOProvider provider;
+    ayisakov::framework::ISerialPort *pPort1 = nullptr;
+    pPort1 = provider.getPort();
+    ASSERT_FALSE(pPort1 == nullptr);
+    std::cout << pPort1->id() << std::endl;
+    ayisakov::framework::ISerialPort *pPort2 = nullptr;
+    pPort2 = provider.getPort();
+    ASSERT_FALSE(pPort2 == nullptr);
+    std::cout << pPort2->id() << std::endl;
+    ASSERT_FALSE(pPort1->id() == pPort2->id());
 }
 } // namespace
 

@@ -30,7 +30,6 @@ class IOListener : public IIOListener
   private:
     IIOProvider *m_pProvider;
     std::atomic<bool> m_isRunning;
-
 };
 } // namespace framework
 } // namespace ayisakov

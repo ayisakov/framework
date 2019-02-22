@@ -44,7 +44,7 @@ class IIOProvider
     /**
      * Unregister a previously subscribed listener
      */
-    virtual void removeListener(IIOListener *pListener) = 0;
+    virtual int removeListener(IIOListener *pListener) = 0;
 
     /**
      * Wait for events on sockets managed by this provider.

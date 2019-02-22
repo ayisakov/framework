@@ -1,7 +1,7 @@
 #ifndef IIOLISTENER_H
 #define IIOLISTENER_H
 
-#include "IMessageReceiver.h"
+#include "IMessageSink.h"
 #include "IRunnable.h"
 
 namespace ayisakov
@@ -13,8 +13,9 @@ class IIOProvider;
  * IIOListener defines an interface for a class of
  * objects that dispatch events for serial ports.
  */
-class IIOListener : public ayisakov::framework::IRunnable,
-                            ayisakov::framework::IMessageReceiver
+class IIOListener
+: public ayisakov::framework::IRunnable,
+  public ayisakov::framework::IMessageSink
 {
   public:
     IIOListener() {}

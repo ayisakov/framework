@@ -23,8 +23,10 @@ ayisakov::framework::ISerialPort *ayisakov::framework::IOProvider::getPort()
         m_unused.erase(it);
     } else {
         // if no unused ports, then create a new port
-        std::unique_ptr<SerialPort> created_derived(new SerialPort(m_ioContext));
+        std::unique_ptr<SerialPort> created_derived(new SerialPort(m_ioContext, this));
         boost::uuids::uuid id = created_derived->uuid();
+        // TODO: make this safer. Check for clashes before inserting;
+        // otherwise this operation can destroy referenced objects.
         m_ports[id] = std::move(created_derived);
         pPort = m_ports[id].get();
     }
@@ -34,7 +36,8 @@ ayisakov::framework::ISerialPort *ayisakov::framework::IOProvider::getPort()
 void ayisakov::framework::IOProvider::release(const std::string &portId)
 {
     // Convert string to uuid
-    boost::uuids::uuid id(portId);
+    boost::uuids::string_generator gen;
+    boost::uuids::uuid id(gen(portId));
     // Make sure that we actually own a port with that UUID
     try {
         std::unique_ptr<ISerialPort> &port_found = m_ports.at(id);
@@ -59,11 +62,11 @@ int ayisakov::framework::IOProvider::setListener(IIOListener *pListener)
     return 0;
 }
 
-void ayisakov::framework::IOProvider::removeListener(ayisakov::framework::IIOListener *pListener)
+int ayisakov::framework::IOProvider::removeListener(ayisakov::framework::IIOListener *pListener)
 {
     if (!pListener) return -2;
 
-    if (pListener != m_pListener) return -1; // listeners must match
+    if (pListener != m_listener) return -1; // listeners must match
 
     // all is well
     m_listener = nullptr;
@@ -72,7 +75,7 @@ void ayisakov::framework::IOProvider::removeListener(ayisakov::framework::IIOLis
 
 int ayisakov::framework::IOProvider::dispatchEvents(ayisakov::framework::IIOListener *pListener)
 {
-    if (pListener != m_pListener) return -1; // listeners must match if registered
+    if (pListener != m_listener) return -1; // listeners must match if registered
 
     return m_ioContext.run();
 }

@@ -2,6 +2,7 @@
 #define IOPROVIDER_H
 
 #include <boost/asio.hpp>
+#include <boost/functional/hash.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <memory>
@@ -13,6 +14,7 @@ namespace ayisakov
 {
 namespace framework
 {
+typedef boost::hash<boost::uuids::uuid> uuid_hash;
 class IOProvider : public IIOProvider
 {
   public:
@@ -41,7 +43,7 @@ class IOProvider : public IIOProvider
     /**
      * Unregister a previously subscribed listener
      */
-    virtual void removeListener(IIOListener *pListener) override;
+    virtual int removeListener(IIOListener *pListener) override;
 
     /**
      * Wait for events on sockets managed by this provider.
@@ -55,16 +57,16 @@ class IOProvider : public IIOProvider
 
   private:
     // Ports, hashed by a unique id with which they are tagged
-    std::unordered_map<boost::uuids::uuid, std::unique_ptr<ISerialPort>> m_ports;
+    std::unordered_map<boost::uuids::uuid, std::unique_ptr<ISerialPort>, uuid_hash> m_ports;
 
     // Unused ports
-    std::unordered_set<boost::uuids::uuid> m_unused;
+    std::unordered_set<boost::uuids::uuid, uuid_hash> m_unused;
 
     // A listener, if one is registered
     IIOListener *m_listener;
 
     // The I/O context
-    boost::asio::io_context m_ioContext;
+    boost::asio::io_service m_ioContext;
 };
 } // namespace framework
 } // namespace ayisakov

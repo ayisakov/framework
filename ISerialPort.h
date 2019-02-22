@@ -2,28 +2,41 @@
 #define ISERIALPORT_H
 
 #include <string>
+#include "IMessageSink.h"
 
 namespace ayisakov
 {
 namespace framework
 {
-class IIOListener;
 class ISerialPort
-class IMessageReceiver;
 {
   public:
     ISerialPort() {}
-    virtual ~ISerialPort {}
+    virtual ~ISerialPort() {}
 
     /**
      * Add a receiver to which events will be forwarded.
      */
-    virtual void registerSink(IMessageReceiver *pSink) = 0;
+    virtual void registerSink(IMessageSink *pSink) = 0;
 
     /**
      * Get the id of this port
      */
-    const std::string &id() = 0;
+    virtual std::string id() = 0;
+
+    /**
+     * Open the device
+     *
+     * @return 0 on success; error code on failure
+     */
+    virtual int open(const std::string &device) = 0;
+
+    /**
+     * Close the device
+     *
+     * @return 0 on success or if already closed
+     */
+    virtual int close() = 0;
 
     // If this port is managed, indicate that it is no longer needed
     virtual void release() = 0;
