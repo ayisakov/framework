@@ -89,6 +89,15 @@ int ayisakov::framework::IOProvider::dispatchEvents(ayisakov::framework::IIOList
 
     m_pWork = std::unique_ptr<boost::asio::io_service::work>(
         new boost::asio::io_service::work(m_ioContext));
-    // Block here until stopped
-    return m_ioContext.run();
+    while(true) {
+        try {
+            // Block here until stopped
+            m_ioContext.run();
+            break; // normal exit
+        } catch(std::exception &e) {
+            // TODO: deal with exception
+            return -1;
+        }
+    }
+    return 0;
 }
