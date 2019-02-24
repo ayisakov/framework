@@ -8,6 +8,7 @@ set(framework_test_SOURCES
   TestMessages.cpp
   ../IOProvider.cpp
   ../SerialPort.cpp
+  ../IOListener.cpp
   test.cpp)
 add_executable(framework_test ${framework_test_SOURCES})
 target_link_libraries(framework_test gtest gtest_main pthread ${Boost_LIBRARIES} )

@@ -1,18 +1,22 @@
 #include <gtest/gtest.h>
+#include <stdio.h>
+#include <chrono>
 #include <fstream>
 #include <list>
 #include <memory>
 #include <string>
-#include <stdio.h>
+#include <thread>
+#include "../IOListener.h"
+#include "../IOProvider.h"
+#include "../ISerialPort.h"
 #include "../SimpleEventApp.h"
 #include "../SimpleLogger.h"
 #include "../ThreadRunner.h"
 #include "TestApp.h"
 #include "TestMessages.h"
-#include "../IOProvider.h"
-#include "../ISerialPort.h"
 
 typedef std::unique_ptr<std::string> TestMessage;
+namespace ayif = ayisakov::framework;
 
 namespace
 {
@@ -120,10 +124,10 @@ TEST_F(SimpleEventAppTest, Logging)
 {
     const std::string logFilePath = "testlog.log";
     ayisakov::framework::SimpleLogger::Options logOpts(false, // log to stdout
-                                                       true,  // log to file
+                                                       true, // log to file
                                                        logFilePath,
                                                        false, // rotate log [future]
-                                                       0      // rotation period
+                                                       0 // rotation period
     );
     std::unique_ptr<ayisakov::framework::SimpleLogger> logger(
         new ayisakov::framework::SimpleLogger(logOpts));
@@ -180,12 +184,66 @@ TEST_F(SimpleEventAppTest, IOProviderSerialPortCreation)
     ayisakov::framework::ISerialPort *pPort1 = nullptr;
     pPort1 = provider.getPort();
     ASSERT_FALSE(pPort1 == nullptr);
-    std::cout << pPort1->id() << std::endl;
+
     ayisakov::framework::ISerialPort *pPort2 = nullptr;
     pPort2 = provider.getPort();
     ASSERT_FALSE(pPort2 == nullptr);
-    std::cout << pPort2->id() << std::endl;
-    ASSERT_FALSE(pPort1->id() == pPort2->id());
+
+    std::string port1Id(pPort1->id());
+    std::string port2Id(pPort2->id());
+    ASSERT_FALSE(port1Id == port2Id);
+
+    pPort1->release();
+    ayisakov::framework::ISerialPort *pAlsoPort1 = nullptr;
+    pAlsoPort1 = provider.getPort();
+    ASSERT_FALSE(pAlsoPort1 == nullptr);
+    ASSERT_TRUE(port1Id == pAlsoPort1->id());
+
+    ayisakov::framework::ISerialPort *pPort3 = nullptr;
+    pPort3 = provider.getPort();
+    ASSERT_FALSE(pPort3 == nullptr);
+    std::string port3Id = pPort3->id();
+    ASSERT_FALSE(port3Id == port1Id);
+    ASSERT_FALSE(port3Id == port2Id);
+}
+
+TEST_F(SimpleEventAppTest, IOListenerInstantiation)
+{
+    std::unique_ptr<ayif::IIOListener> pListener(new ayif::IOListener());
+    ASSERT_TRUE(pListener);
+    ASSERT_FALSE(pListener->isRunning());
+
+    // Create an I/O provider and make the listener a subscriber
+    std::unique_ptr<ayif::IIOProvider> pProvider(new ayif::IOProvider());
+    ASSERT_TRUE(pProvider.get());
+    ASSERT_EQ(pListener->subscribe(pProvider.get()), 0);
+
+
+    // Start the listener thread
+    ayif::ThreadRunner listenerRunner(*pListener.get());
+    ASSERT_FALSE(listenerRunner.launch());
+    ASSERT_TRUE(pListener);
+    // Wait for the listener to start
+    int waitCount = 5;
+    auto waitStartStop = [&](int count, bool start) {
+        ASSERT_TRUE(pListener);
+        while(start ? !pListener->isRunning() : pListener->isRunning()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            if(--count <= 0) {
+                break;
+            }
+        }
+    };
+    waitStartStop(waitCount, true);
+    ASSERT_TRUE(pListener->isRunning());
+
+    // Listener should terminate when its IOProvider is destroyed
+    std::cout << "Resetting pProvider" << std::endl;
+    pProvider.reset();
+    waitStartStop(waitCount, false);
+    ASSERT_FALSE(pListener->isRunning());
+
+    // TODO: also test reverse destruction order with subscribed listener
 }
 } // namespace
 

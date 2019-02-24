@@ -67,6 +67,10 @@ class IOProvider : public IIOProvider
 
     // The I/O context
     boost::asio::io_service m_ioContext;
+
+    // Needed to keep io_service::run() from returning when there
+    // are no outstanding asynchronous operations
+    std::unique_ptr<boost::asio::io_service::work> m_pWork;
 };
 } // namespace framework
 } // namespace ayisakov

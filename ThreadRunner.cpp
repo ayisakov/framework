@@ -1,3 +1,4 @@
+#include <iostream>
 #include "ThreadRunner.h"
 
 using ayisakov::framework::IRunnable;
@@ -33,6 +34,7 @@ int ayisakov::framework::ThreadRunner::run()
 {
     m_running = true;
     int ret = IAsyncRunner::run();
+    std::cout << ret << " from IAsyncRunner::run()" << std::endl;
     m_running = false;
     m_retval = ret;
     return ret;

@@ -32,6 +32,11 @@ class IIOListener
     virtual int subscribe(IIOProvider *pProvider) = 0;
 
     /**
+     * Remove link between the specified provider and this listener
+     */
+    virtual void unsubscribe(IIOProvider *pProvider) = 0;
+
+    /**
      * Returns true if the listener is running (usually in its own thread)
      */
     virtual bool isRunning() = 0;

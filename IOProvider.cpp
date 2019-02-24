@@ -10,7 +10,12 @@ ayisakov::framework::IOProvider::IOProvider()
 
 ayisakov::framework::IOProvider::~IOProvider()
 {
-    // Maybe terminate the listener here if still registered?
+    // Stop the io_service/context, dispatching all outstanding events
+    m_pWork.reset();
+    // Remove reference to this in a listener, if one exists
+    if(m_listener) {
+        m_listener->unsubscribe(this);
+    }
 }
 
 ayisakov::framework::ISerialPort *ayisakov::framework::IOProvider::getPort()
@@ -23,7 +28,8 @@ ayisakov::framework::ISerialPort *ayisakov::framework::IOProvider::getPort()
         m_unused.erase(it);
     } else {
         // if no unused ports, then create a new port
-        std::unique_ptr<SerialPort> created_derived(new SerialPort(m_ioContext, this));
+        std::unique_ptr<SerialPort> created_derived(
+            new SerialPort(m_ioContext, this));
         boost::uuids::uuid id = created_derived->uuid();
         // TODO: make this safer. Check for clashes before inserting;
         // otherwise this operation can destroy referenced objects.
@@ -53,9 +59,10 @@ void ayisakov::framework::IOProvider::release(const std::string &portId)
 
 int ayisakov::framework::IOProvider::setListener(IIOListener *pListener)
 {
-    if (m_listener) return -1; // Only one listener can be a subscriber
+    if(m_listener)
+        return -1; // Only one listener can be a subscriber
 
-    if (!pListener) return -2; // Fed a null listener pointer
+    if(!pListener) return -2; // Fed a null listener pointer
 
     // all is well
     m_listener = pListener;
@@ -64,9 +71,10 @@ int ayisakov::framework::IOProvider::setListener(IIOListener *pListener)
 
 int ayisakov::framework::IOProvider::removeListener(ayisakov::framework::IIOListener *pListener)
 {
-    if (!pListener) return -2;
+    if(!pListener) return -2;
 
-    if (pListener != m_listener) return -1; // listeners must match
+    if(pListener != m_listener)
+        return -1; // listeners must match
 
     // all is well
     m_listener = nullptr;
@@ -75,7 +83,12 @@ int ayisakov::framework::IOProvider::removeListener(ayisakov::framework::IIOList
 
 int ayisakov::framework::IOProvider::dispatchEvents(ayisakov::framework::IIOListener *pListener)
 {
-    if (pListener != m_listener) return -1; // listeners must match if registered
+    if(pListener != m_listener) {
+        return -1; // listeners must match if registered
+    }
 
+    m_pWork = std::unique_ptr<boost::asio::io_service::work>(
+        new boost::asio::io_service::work(m_ioContext));
+    // Block here until stopped
     return m_ioContext.run();
 }

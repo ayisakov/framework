@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "IOListener.h"
 #include "IOProvider.h"
 
@@ -17,13 +19,10 @@ ayisakov::framework::IOListener::IOListener(ayisakov::framework::IIOProvider *pP
 
 ayisakov::framework::IOListener::~IOListener()
 {
-    if(m_pProvider) {
-        m_pProvider->removeListener(this);
-    }
-    m_pProvider = nullptr;
+    unsubscribe(m_pProvider);
 }
 
-ayisakov::framework::IOListener::subscribe(ayisakov::framework::IIOProvider *pProvider)
+int ayisakov::framework::IOListener::subscribe(ayisakov::framework::IIOProvider *pProvider)
 {
     // No changing of provider allowed while dispatching events
     if(m_isRunning) return -1;
@@ -42,16 +41,29 @@ ayisakov::framework::IOListener::subscribe(ayisakov::framework::IIOProvider *pPr
     return 0;
 }
 
+void ayisakov::framework::IOListener::unsubscribe(IIOProvider *pProvider)
+{
+    if(m_pProvider && m_pProvider == pProvider) {
+        m_pProvider->removeListener(this);
+        m_pProvider = nullptr;
+    }
+}
+
 int ayisakov::framework::IOListener::run()
 {
-    if(m_pProvider) return -1;
+    std::cout << "Entered IOListener::run() with m_pProvider = " << m_pProvider
+              << std::endl;
+    if(!m_pProvider) return -1;
 
     // indicate that we are now running
     m_isRunning = true;
 
-    int retval = m_pProvider->dispatchEvents();
+    std::cout << "Calling m_pProvider->dispatchEvents(this)" << std::endl;
+    int retval = m_pProvider->dispatchEvents(this);
 
     // indicate that we are no longer running
+    std::cout << retval << " from m_pProvider->dispatchEvents(this)"
+              << std::endl;
     m_isRunning = false;
     return retval;
 }
@@ -59,4 +71,9 @@ int ayisakov::framework::IOListener::run()
 bool ayisakov::framework::IOListener::isRunning()
 {
     return m_isRunning;
+}
+
+int ayisakov::framework::IOListener::send(IMessagePtr &message)
+{
+    // TODO: implement
 }

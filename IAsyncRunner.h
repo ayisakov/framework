@@ -1,6 +1,7 @@
 #ifndef IASYNCRUNNER_H
 #define IASYNCRUNNER_H
 
+#include <iostream>
 #include "IRunnable.h"
 
 namespace ayisakov
@@ -43,6 +44,7 @@ class IAsyncRunner
             return ret;
         }
         ret = m_task.run();
+        std::cout << ret << " from m_task.run()" << std::endl;
         m_task.postrun();
         return ret;
     }

@@ -19,6 +19,11 @@ class IOListener : public IIOListener
     virtual int subscribe(IIOProvider *pProvider) override;
 
     /**
+     * Remove link between the specified provider and this listener
+     */
+    virtual void unsubscribe(IIOProvider *pProvider) override;
+
+    /**
      * Returns true if the listener is running (usually in its own thread)
      */
     virtual bool isRunning() override;
@@ -26,6 +31,13 @@ class IOListener : public IIOListener
     // run() should then call pProvider's dispatchEvents() function to begin
     // dispatching events for ports created by the registered provider
     virtual int run() override;
+
+    /**
+     * Send a message to this receiver
+     * @param [in] message the message
+     * @return 0 on success
+     */
+    virtual int send(IMessagePtr &message) override;
 
   private:
     IIOProvider *m_pProvider;
