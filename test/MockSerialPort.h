@@ -1,30 +1,17 @@
-#ifndef SERIALPORT_H
-#define SERIALPORT_H
+#ifndef MOCKSERIALPORT_H
+#define MOCKSERIALPORT_H
 
-#include <boost/asio.hpp>
-#include <boost/asio/serial_port.hpp>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <unordered_map>
-#include "ISerialPort.h"
-#include "UniqueReadBuffer.h"
-#include "UniqueWriteBuffer.h"
+#include "../ISerialPort.h"
 
 namespace ayisakov
 {
 namespace framework
 {
-class IIOProvider;
-
-class SerialPort : public ISerialPort
+class MockSerialPort : public ISerialPort
 {
   public:
-    /**
-     * NOTE: Boost has renamed io_service to io_context in
-     * version >= 1.66 (io_service remains as a typedef)
-     */
-    SerialPort(boost::asio::io_service &context, IIOProvider *pProvider);
-    virtual ~SerialPort();
+    MockSerialPort();
+    virtual ~MockSerialPort();
 
     /**
      * Add a receiver to which events will be forwarded.
@@ -35,11 +22,6 @@ class SerialPort : public ISerialPort
      * Get the id of this port
      */
     virtual std::string id() override;
-
-    /**
-     * Get the native UUID of this port
-     */
-    virtual const boost::uuids::uuid &uuid();
 
     /**
      * Open the device
@@ -55,7 +37,7 @@ class SerialPort : public ISerialPort
      */
     virtual int close() override;
 
-    // indicate to the provider that the port is no longer being used
+    // If this port is managed, indicate that it is no longer needed
     virtual void release() override;
 
     // Begin an asynchronous write operation
@@ -80,17 +62,10 @@ class SerialPort : public ISerialPort
     virtual void onReadSuccess(const char *buffer, size_t len) override;
     virtual void onReadFail(int errorCode) override;
 
-  private:
-    IMessageSink *m_pSink;
-    IIOProvider *m_pProvider;
-    boost::asio::serial_port m_port;
-    boost::uuids::uuid m_uuid;
-    // Buffers with outstanding write operations
-    std::unordered_map<BufferTag, UniqueWriteBufferPtr> m_writeBuffers;
-    // Buffers with outstanding read operations
-    std::unordered_map<BufferTag, UniqueReadBufferPtr> m_readBuffers;
+private:
+    IMessageSink m_pSink;
 };
 } // namespace framework
 } // namespace ayisakov
 
-#endif // SERIALPORT_H
+#endif // MOCKSERIALPORT_H

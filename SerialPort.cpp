@@ -62,7 +62,18 @@ void ayisakov::framework::SerialPort::release()
 
 int ayisakov::framework::SerialPort::writeAsync(const std::string &buffer)
 {
-    // TODO: implement
+    auto handler = [this](boost::system::error_code &error,
+                          std::size_t bytesWritten) {
+                       // TODO: create a member hash table of buffers and keep track of number of bytes written. If it is necessary to write a buffer in more than one operation, refer to the buffer identified by the hash
+        if(error) {
+            onWriteFail(error.value());
+        } else {
+            onWriteSuccess(bytesWritten);
+        }
+    };
+    m_port.async_write_some(boost::asio::buffer(buffer.c_str(),
+                                                buffer.size()),
+                            handler);
 }
 
 int ayisakov::framework::SerialPort::readAsync()
@@ -74,7 +85,7 @@ void ayisakov::framework::SerialPort::reset() { m_port.close(); }
 
 void ayisakov::framework::SerialPort::onWriteSuccess(int bytesWritten)
 {
-    // TODO: implement
+    // TODO: implement (e.g. by posting a message to the registered sink)
 }
 
 void ayisakov::framework::SerialPort::onWriteFail(int errorCode)

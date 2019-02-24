@@ -41,7 +41,11 @@ class ISerialPort
     // If this port is managed, indicate that it is no longer needed
     virtual void release() = 0;
 
-    // Begin an asynchronous write operation
+    /**
+     * Begin an asynchronous write operation
+     * The caller must guarantee that buffer persists until
+     * either onWriteSuccess() or onWriteFail() is called
+     */
     virtual int writeAsync(const std::string &buffer) = 0;
 
     // Begin an asynchronous read operation
