@@ -1,4 +1,6 @@
+#ifdef FRAMEWORK_TASK_DEBUG
 #include <iostream>
+#endif // FRAMEWORK_TASK_DEBUG
 
 #include "IOListener.h"
 #include "IOProvider.h"
@@ -51,19 +53,25 @@ void ayisakov::framework::IOListener::unsubscribe(IIOProvider *pProvider)
 
 int ayisakov::framework::IOListener::run()
 {
+#ifdef FRAMEWORK_TASK_DEBUG
     std::cout << "Entered IOListener::run() with m_pProvider = " << m_pProvider
               << std::endl;
+#endif // FRAMEWORK_TASK_DEBUG
     if(!m_pProvider) return -1;
 
     // indicate that we are now running
     m_isRunning = true;
 
+#ifdef FRAMEWORK_TASK_DEBUG
     std::cout << "Calling m_pProvider->dispatchEvents(this)" << std::endl;
+#endif // FRAMEWORK_TASK_DEBUG
     int retval = m_pProvider->dispatchEvents(this);
 
     // indicate that we are no longer running
+#ifdef FRAMEWORK_TASK_DEBUG
     std::cout << retval << " from m_pProvider->dispatchEvents(this)"
               << std::endl;
+#endif // FRAMEWORK_TASK_DEBUG
     m_isRunning = false;
     return retval;
 }

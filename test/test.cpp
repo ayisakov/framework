@@ -228,7 +228,7 @@ TEST_F(SimpleEventAppTest, IOListenerInstantiation)
     auto waitStartStop = [&](int count, bool start) {
         ASSERT_TRUE(pListener);
         while(start ? !pListener->isRunning() : pListener->isRunning()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
             if(--count <= 0) {
                 break;
             }
@@ -238,12 +238,23 @@ TEST_F(SimpleEventAppTest, IOListenerInstantiation)
     ASSERT_TRUE(pListener->isRunning());
 
     // Listener should terminate when its IOProvider is destroyed
+#ifdef FRAMEWORK_TASK_DEBUG
     std::cout << "Resetting pProvider" << std::endl;
+#endif // FRAMEWORK_TASK_DEBUG
     pProvider.reset();
     waitStartStop(waitCount, false);
     ASSERT_FALSE(pListener->isRunning());
-
-    // TODO: also test reverse destruction order with subscribed listener
+}
+TEST_F(SimpleEventAppTest, IOListenerIOProviderSafeDestruction)
+{
+    // reverse construction and destruction order with subscribed listener
+    std::unique_ptr<ayif::IIOProvider> pProvider(new ayif::IOProvider());
+    std::unique_ptr<ayif::IIOListener> pListener1(
+        new ayif::IOListener(pProvider.get()));
+    // Listener destruction should be safe and allow another listener to subscribe.
+    std::unique_ptr<ayif::IIOListener> pListener2(new ayif::IOListener());
+    pListener1.reset();
+    ASSERT_EQ(pListener2->subscribe(pProvider.get()), 0);
 }
 } // namespace
 

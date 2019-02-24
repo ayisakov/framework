@@ -1,4 +1,6 @@
+#ifdef FRAMEWORK_TASK_DEBUG
 #include <iostream>
+#endif // FRAMEWORK_TASK_DEBUG
 #include "ThreadRunner.h"
 
 using ayisakov::framework::IRunnable;
@@ -34,7 +36,9 @@ int ayisakov::framework::ThreadRunner::run()
 {
     m_running = true;
     int ret = IAsyncRunner::run();
+#ifdef FRAMEWORK_TASK_DEBUG
     std::cout << ret << " from IAsyncRunner::run()" << std::endl;
+#endif // FRAMEWORK_TASK_DEBUG
     m_running = false;
     m_retval = ret;
     return ret;
@@ -42,8 +46,8 @@ int ayisakov::framework::ThreadRunner::run()
 
 int ayisakov::framework::ThreadRunner::waitExit()
 {
-    if (!m_thread.joinable()) {
-        if (m_running) {
+    if(!m_thread.joinable()) {
+        if(m_running) {
             return -1; // running but not joinable is an error condition
         }
         return m_retval; // already ended

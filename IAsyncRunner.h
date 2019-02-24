@@ -1,7 +1,9 @@
 #ifndef IASYNCRUNNER_H
 #define IASYNCRUNNER_H
 
+#ifdef FRAMEWORK_TASK_DEBUG
 #include <iostream>
+#endif // FRAMEWORK_TASK_DEBUG
 #include "IRunnable.h"
 
 namespace ayisakov
@@ -44,7 +46,9 @@ class IAsyncRunner
             return ret;
         }
         ret = m_task.run();
+#ifdef FRAMEWORK_TASK_DEBUG
         std::cout << ret << " from m_task.run()" << std::endl;
+#endif // FRAMEWORK_TASK_DEBUG
         m_task.postrun();
         return ret;
     }
