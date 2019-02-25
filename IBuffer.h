@@ -10,8 +10,6 @@ class IBuffer
 {
     IBuffer() {}
     virtual ~IBuffer() {}
-    // the data
-    virtual const char *contents() = 0;
     // total number of bytes
     virtual std::size_t length() = 0;
     // a unique tag

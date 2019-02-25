@@ -2,24 +2,44 @@
 #define UNIQUEWRITEBUFFER_H
 
 #include <memory>
-#include "BufferCommon.h"
-#include "IWritable.h"
+#include <pair>
+#include <string>
+#include "BufferProxy.h"
+#include "IWriteBuffer.h"
 
 namespace ayisakov
 {
 namespace framework
 {
-class UniqueWriteBuffer : public BufferCommon, public IWritable
+class UniqueWriteBuffer : public IWriteBuffer
 {
   public:
-    UniqueWriteBuffer(const char *data, size_t length);
+    // construct using a null-terminated string
+    UniqueWriteBuffer(const char *data);
+    // construct using std::string
+    UniqueWriteBuffer(const std::string &data);
     UniqueWriteBuffer(const UniqueWriteBuffer &original) = delete;
     UniqueWriteBuffer operator=(const UniqueWriteBuffer &orig) = delete;
-    virtual ~UniqueWriteBuffer();
+    ~UniqueWriteBuffer();
 
-    std::size_t written() override;
+    // total number of bytes
+    std::size_t length() override;
+    // a unique tag
+    BufferTag tag() override;
+
+    // get a pointer to the beginning of the buffer
+    const std::uint8_t *contents() override;
+    // get a reference to the beginning of the unwritten portion
+    BufferProxy unwrittenContents() override;
+    // set number of bytes written from this buffer
+    // throws std::out_of_range if written > length()
+    void bytesWritten(std::size_t written) override;
+    // get number of bytes written from this buffer
+    std::size_t bytesWritten() override;
 
   private:
+    std::string m_data;
+    std::size_t m_bytesWritten;
 };
 
 using UniqueWriteBufferPtr = std::unique_ptr<UniqueWriteBuffer>;
