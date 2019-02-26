@@ -68,6 +68,13 @@ class SerialPort : public ISerialPort
                            const WriteCallback &callback) override;
 
     /**
+     * Perform a blocking write operation
+     *
+     * @return 0 on success, nonzero error code on failure
+     */
+    virtual int writeSync(IWriteBuffer &writeBuf) override;
+
+    /**
      * Begin an asynchronous read operation, transferring
      * ownership of the buffer to the port.
      * Upon completion of the read operation, the buffer
@@ -75,6 +82,13 @@ class SerialPort : public ISerialPort
      */
     virtual int readAsync(IReadBufferPtr &pReadBuf,
                           const ReadCallback &callback) override;
+
+    /**
+     * Perform a blocking read operation
+     *
+     * @return 0 on success, nonzero error code on failure
+     */
+    virtual int readSync(IReadBuffer &readBuf) override;
 
     /**
      * Reset this port, i.e. disconnect and remove association

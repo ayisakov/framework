@@ -57,6 +57,13 @@ class ISerialPort
                            const WriteCallback &callback) = 0;
 
     /**
+     * Perform a blocking write operation
+     *
+     * @return 0 on success, nonzero error code on failure
+     */
+    virtual int writeSync(IWriteBuffer &writeBuf) = 0;
+
+    /**
      * Begin an asynchronous read operation, transferring
      * ownership of the buffer to the port.
      * Upon completion of the read operation, the buffer
@@ -64,6 +71,13 @@ class ISerialPort
      */
     virtual int readAsync(IReadBufferPtr &pReadBuf,
                           const ReadCallback &callback) = 0;
+
+    /**
+     * Perform a blocking read operation
+     *
+     * @return 0 on success, nonzero error code on failure
+     */
+    virtual int readSync(IReadBuffer &readBuf) = 0;
 
     /**
      * Reset this port, i.e. disconnect and remove association
@@ -78,8 +92,8 @@ class ISerialPort
 
     //    virtual void onWriteSuccess(int bytesWritten) = 0;
     //    virtual void onWriteFail(int errorCode) = 0;
-    //    virtual void onReadSuccess(IReadBufferPtr &pReadbuf) = 0;
-    //    virtual void onReadFail(int errorCode) = 0;
+    //    virtual void onReadSuccess(IReadBufferPtr &pReadbuf) =
+    //    0; virtual void onReadFail(int errorCode) = 0;
 };
 } // namespace framework
 } // namespace ayisakov

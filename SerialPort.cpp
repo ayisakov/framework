@@ -88,6 +88,24 @@ int ayisakov::framework::SerialPort::writeAsync(IWriteBufferPtr &pWriteBuf,
                             handler);
 }
 
+int ayisakov::framework::SerialPort::writeSync(IWriteBuffer &writeBuf)
+{
+    // TODO: it's probably cleaner to let any exceptions bubble up through
+    // this function instead
+    try {
+        std::size_t written =
+            boost::asio::write(m_port,
+                               boost::asio::buffer(writeBuf.contents(),
+                                                   writeBuf.length()));
+        if(written != writeBuf.length()) {
+            return -1;
+        }
+    } catch(std::exception &e) {
+        return -1;
+    }
+    return 0;
+}
+
 int ayisakov::framework::SerialPort::readAsync(IReadBufferPtr &pReadBuf,
                                                const ReadCallback &callback)
 {
@@ -113,6 +131,14 @@ int ayisakov::framework::SerialPort::readAsync(IReadBufferPtr &pReadBuf,
     m_port.async_read_some(boost::asio::buffer(pReadBuf->contents(),
                                                pReadBuf->length()),
                            handler);
+}
+
+int ayisakov::framework::SerialPort::readSync(IReadBuffer &readBuf)
+{
+    // TODO: implement
+    // TODO: think about what to do when readBuf is not large enough to
+    // contain all of the available data. Idea: caller can check
+    // if read == length and call again if so.
 }
 
 void ayisakov::framework::SerialPort::reset() { m_port.close(); }
