@@ -1,13 +1,19 @@
 #ifndef ISERIALPORT_H
 #define ISERIALPORT_H
 
+#include <functional>
 #include <string>
 #include "IMessageSink.h"
+#include "IReadBuffer.h"
+#include "IWriteBuffer.h"
 
 namespace ayisakov
 {
 namespace framework
 {
+using WriteCallback = std::function<void(IWriteBufferPtr &)>;
+using ReadCallback = std::function<void(IReadBufferPtr &)>;
+
 class ISerialPort
 {
   public:
@@ -42,14 +48,22 @@ class ISerialPort
     virtual void release() = 0;
 
     /**
-     * Begin an asynchronous write operation
-     * The caller must guarantee that buffer persists until
-     * either onWriteSuccess() or onWriteFail() is called
+     * Begin an asynchronous write operation, transferring
+     * ownership of the buffer to the port.
+     * Upon completion of the write operation, the buffer
+     * will be returned to the caller via the callback.
      */
-    virtual int writeAsync(const std::string &buffer) = 0;
+    virtual int writeAsync(IWriteBufferPtr &pWriteBuf,
+                           const WriteCallback &callback) = 0;
 
-    // Begin an asynchronous read operation
-    virtual int readAsync() = 0;
+    /**
+     * Begin an asynchronous read operation, transferring
+     * ownership of the buffer to the port.
+     * Upon completion of the read operation, the buffer
+     * will be returned to the caller via the callback.
+     */
+    virtual int readAsync(IReadBufferPtr &pReadBuf,
+                          const ReadCallback &callback) = 0;
 
     /**
      * Reset this port, i.e. disconnect and remove association
@@ -62,10 +76,10 @@ class ISerialPort
      * than the one that called writeAsync() or readAsync().
      */
 
-    virtual void onWriteSuccess(int bytesWritten) = 0;
-    virtual void onWriteFail(int errorCode) = 0;
-    virtual void onReadSuccess(const char *buffer, size_t len) = 0;
-    virtual void onReadFail(int errorCode) = 0;
+    //    virtual void onWriteSuccess(int bytesWritten) = 0;
+    //    virtual void onWriteFail(int errorCode) = 0;
+    //    virtual void onReadSuccess(IReadBufferPtr &pReadbuf) = 0;
+    //    virtual void onReadFail(int errorCode) = 0;
 };
 } // namespace framework
 } // namespace ayisakov

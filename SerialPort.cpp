@@ -60,45 +60,79 @@ void ayisakov::framework::SerialPort::release()
     }
 }
 
-int ayisakov::framework::SerialPort::writeAsync(const std::string &buffer)
+int ayisakov::framework::SerialPort::writeAsync(IWriteBufferPtr &pWriteBuf,
+                                                const WriteCallback &callback)
 {
-    auto handler = [this](boost::system::error_code &error,
-                          std::size_t bytesWritten) {
-                       // TODO: create a member hash table of buffers and keep track of number of bytes written. If it is necessary to write a buffer in more than one operation, refer to the buffer identified by the hash
-        if(error) {
-            onWriteFail(error.value());
-        } else {
-            onWriteSuccess(bytesWritten);
+    if(!pWriteBuf) return -1; // empty container
+
+    // register this buffer, making sure tag is unique
+    BufferTag tag = pWriteBuf->tag();
+    if(m_writeBuffers.find(tag) != m_writeBuffers.end()) {
+        return -2; // tag not unique
+    }
+    m_writeBuffers[tag] = std::move(pWriteBuf);
+
+    auto handler = [this, callback, tag](const boost::system::error_code &error,
+                                         std::size_t bytesWritten) {
+        IWriteBufferPtr &buf = m_writeBuffers[tag];
+        buf->bytesWritten(bytesWritten);
+        buf->error(error.value());
+        if(callback) {
+            callback(buf);
         }
+        m_writeBuffers.erase(tag);
     };
-    m_port.async_write_some(boost::asio::buffer(buffer.c_str(),
-                                                buffer.size()),
+
+    m_port.async_write_some(boost::asio::buffer(pWriteBuf->contents(),
+                                                pWriteBuf->length()),
                             handler);
 }
 
-int ayisakov::framework::SerialPort::readAsync()
+int ayisakov::framework::SerialPort::readAsync(IReadBufferPtr &pReadBuf,
+                                               const ReadCallback &callback)
 {
-    // TODO: implement
+    if(!pReadBuf) return -1; // empty container
+
+    // register this buffer, making sure tag is unique
+    BufferTag tag = pReadBuf->tag();
+    if(m_readBuffers.find(tag) != m_readBuffers.end()) {
+        return -2; // tag not unique
+    }
+    m_readBuffers[tag] = std::move(pReadBuf);
+
+    auto handler = [this, callback, tag](const boost::system::error_code &error,
+                                         std::size_t bytesRead) {
+        IReadBufferPtr &buf = m_readBuffers[tag];
+        buf->bytesRead(bytesRead);
+        buf->error(error.value());
+        if(callback) {
+            callback(buf);
+        }
+        m_readBuffers.erase(tag);
+    };
+    m_port.async_read_some(boost::asio::buffer(pReadBuf->contents(),
+                                               pReadBuf->length()),
+                           handler);
 }
 
 void ayisakov::framework::SerialPort::reset() { m_port.close(); }
 
-void ayisakov::framework::SerialPort::onWriteSuccess(int bytesWritten)
-{
-    // TODO: implement (e.g. by posting a message to the registered sink)
-}
-
-void ayisakov::framework::SerialPort::onWriteFail(int errorCode)
-{
-    // TODO: implement
-}
-
-void ayisakov::framework::SerialPort::onReadSuccess(const char *buffer, size_t len)
-{
-    // TODO: implement
-}
-
-void ayisakov::framework::SerialPort::onReadFail(int errorCode)
-{
-    // TODO: implement
-}
+// void ayisakov::framework::SerialPort::onWriteSuccess(int bytesWritten)
+//{
+//    // TODO: implement (e.g. by posting a message to the registered sink)
+//}
+//
+// void ayisakov::framework::SerialPort::onWriteFail(int errorCode)
+//{
+//    // TODO: implement
+//}
+//
+// void ayisakov::framework::SerialPort::onReadSuccess(const char *buffer, size_t len)
+//{
+//    // TODO: implement
+//}
+//
+// void ayisakov::framework::SerialPort::onReadFail(int errorCode)
+//{
+//    // TODO: implement
+//}

@@ -1,8 +1,9 @@
 #ifndef IWRITEBUFFER_H
 #define IWRITEBUFFER_H
 
-#include "IBuffer.h"
+#include <memory>
 #include "BufferProxy.h"
+#include "IBuffer.h"
 
 namespace ayisakov
 {
@@ -22,6 +23,7 @@ class IWriteBuffer : public IBuffer
     // get number of bytes written from this buffer
     virtual std::size_t bytesWritten() = 0;
 };
+using IWriteBufferPtr = std::unique_ptr<IWriteBuffer>;
 } // namespace framework
 } // namespace ayisakov
 

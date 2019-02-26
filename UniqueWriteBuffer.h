@@ -36,10 +36,14 @@ class UniqueWriteBuffer : public IWriteBuffer
     void bytesWritten(std::size_t written) override;
     // get number of bytes written from this buffer
     std::size_t bytesWritten() override;
+    // error code (e.g. from asynchronous buffer operation) (==0 if no error)
+    virtual BufferErrorCode error() override;
+    virtual void error(BufferErrorCode code) override;
 
   private:
     std::string m_data;
     std::size_t m_bytesWritten;
+    BufferErrorCode m_errorCode;
 };
 
 using UniqueWriteBufferPtr = std::unique_ptr<UniqueWriteBuffer>;

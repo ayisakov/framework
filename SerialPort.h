@@ -7,8 +7,8 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <unordered_map>
 #include "ISerialPort.h"
-#include "UniqueReadBuffer.h"
-#include "UniqueWriteBuffer.h"
+#include "IReadBuffer.h"
+#include "IWriteBuffer.h"
 
 namespace ayisakov
 {
@@ -58,11 +58,23 @@ class SerialPort : public ISerialPort
     // indicate to the provider that the port is no longer being used
     virtual void release() override;
 
-    // Begin an asynchronous write operation
-    virtual int writeAsync(const std::string &buffer) override;
+    /**
+     * Begin an asynchronous write operation, transferring
+     * ownership of the buffer to the port.
+     * Upon completion of the write operation, the buffer
+     * will be returned to the caller via the callback.
+     */
+    virtual int writeAsync(IWriteBufferPtr &pWriteBuf,
+                           const WriteCallback &callback) override;
 
-    // Begin an asynchronous read operation
-    virtual int readAsync() override;
+    /**
+     * Begin an asynchronous read operation, transferring
+     * ownership of the buffer to the port.
+     * Upon completion of the read operation, the buffer
+     * will be returned to the caller via the callback.
+     */
+    virtual int readAsync(IReadBufferPtr &pReadBuf,
+                          const ReadCallback &callback) override;
 
     /**
      * Reset this port, i.e. disconnect and remove association
@@ -75,10 +87,10 @@ class SerialPort : public ISerialPort
      * than the one that called writeAsync() or readAsync().
      */
 
-    virtual void onWriteSuccess(int bytesWritten) override;
-    virtual void onWriteFail(int errorCode) override;
-    virtual void onReadSuccess(const char *buffer, size_t len) override;
-    virtual void onReadFail(int errorCode) override;
+    //    virtual void onWriteSuccess(int bytesWritten) override;
+    //    virtual void onWriteFail(int errorCode) override;
+    //    virtual void onReadSuccess(const char *buffer, size_t len) override;
+    //    virtual void onReadFail(int errorCode) override;
 
   private:
     IMessageSink *m_pSink;
@@ -86,9 +98,9 @@ class SerialPort : public ISerialPort
     boost::asio::serial_port m_port;
     boost::uuids::uuid m_uuid;
     // Buffers with outstanding write operations
-    std::unordered_map<BufferTag, UniqueWriteBufferPtr> m_writeBuffers;
+    std::unordered_map<BufferTag, IWriteBufferPtr> m_writeBuffers;
     // Buffers with outstanding read operations
-    std::unordered_map<BufferTag, UniqueReadBufferPtr> m_readBuffers;
+    std::unordered_map<BufferTag, IReadBufferPtr> m_readBuffers;
 };
 } // namespace framework
 } // namespace ayisakov

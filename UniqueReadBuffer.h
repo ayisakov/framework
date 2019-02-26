@@ -30,10 +30,14 @@ class UniqueReadBuffer : public IReadBuffer
     void bytesRead(std::size_t read) override;
     // get number of bytes read into this buffer
     std::size_t bytesRead() override;
+    // error code (e.g. from asynchronous buffer operation) (==0 if no error)
+    virtual BufferErrorCode error() override;
+    virtual void error(BufferErrorCode code) override;
 
   private:
     std::vector<std::uint8_t> m_data;
     std::size_t m_bytesRead;
+    BufferErrorCode m_errorCode;
 };
 
 using UniqueReadBufferPtr = std::unique_ptr<UniqueReadBuffer>;

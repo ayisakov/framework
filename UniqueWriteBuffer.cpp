@@ -4,12 +4,12 @@
 namespace ayif = ayisakov::framework;
 
 ayisakov::framework::UniqueWriteBuffer::UniqueWriteBuffer(const char *data)
-: m_data(data), m_bytesWritten(0)
+: m_data(data), m_bytesWritten(0), m_errorCode(0)
 {
 }
 
 ayisakov::framework::UniqueWriteBuffer::UniqueWriteBuffer(const std::string &data)
-: m_data(data), m_bytesWritten(0)
+: m_data(data), m_bytesWritten(0), m_errorCode(0)
 {
 }
 
@@ -44,3 +44,7 @@ void ayif::UniqueWriteBuffer::bytesWritten(std::size_t written)
     }
     m_bytesWritten = written;
 }
+
+void ayif::UniqueWriteBuffer::error(BufferErrorCode code) { m_errorCode = code; }
+
+ayif::BufferErrorCode ayif::UniqueWriteBuffer::error() { return m_errorCode; }
