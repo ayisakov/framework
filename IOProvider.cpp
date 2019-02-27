@@ -18,7 +18,7 @@ ayisakov::framework::IOProvider::~IOProvider()
     }
 }
 
-ayisakov::framework::ISerialPort *ayisakov::framework::IOProvider::getPort()
+ayisakov::framework::ISerialPort *ayisakov::framework::IOProvider::getSerialPort()
 {
     ISerialPort *pPort = nullptr;
     // first, check if there are any unused ports

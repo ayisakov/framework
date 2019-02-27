@@ -23,7 +23,7 @@ class IOProvider : public IIOProvider
 
     // Create or obtain an available serial port and return
     // a pointer to it
-    virtual ISerialPort *getPort() override;
+    virtual ISerialPort *getSerialPort() override;
 
     // Indicate to the provider that the port is no longer being used
     virtual void release(const std::string &portId) override;

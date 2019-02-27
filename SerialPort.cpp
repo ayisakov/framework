@@ -135,10 +135,14 @@ int ayisakov::framework::SerialPort::readAsync(IReadBufferPtr &pReadBuf,
 
 int ayisakov::framework::SerialPort::readSync(IReadBuffer &readBuf)
 {
-    // TODO: implement
-    // TODO: think about what to do when readBuf is not large enough to
-    // contain all of the available data. Idea: caller can check
-    // if read == length and call again if so.
+    try {
+        boost::asio::read(m_port,
+                          boost::asio::buffer(readbuf.contents(),
+                                              readbuf.length()));
+    } catch (std::exception &e) {
+        return -1;
+    }
+    return 0;
 }
 
 void ayisakov::framework::SerialPort::reset() { m_port.close(); }

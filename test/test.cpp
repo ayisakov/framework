@@ -182,11 +182,11 @@ TEST_F(SimpleEventAppTest, IOProviderSerialPortCreation)
 {
     ayisakov::framework::IOProvider provider;
     ayisakov::framework::ISerialPort *pPort1 = nullptr;
-    pPort1 = provider.getPort();
+    pPort1 = provider.getSerialPort();
     ASSERT_FALSE(pPort1 == nullptr);
 
     ayisakov::framework::ISerialPort *pPort2 = nullptr;
-    pPort2 = provider.getPort();
+    pPort2 = provider.getSerialPort();
     ASSERT_FALSE(pPort2 == nullptr);
 
     std::string port1Id(pPort1->id());
@@ -195,12 +195,12 @@ TEST_F(SimpleEventAppTest, IOProviderSerialPortCreation)
 
     pPort1->release();
     ayisakov::framework::ISerialPort *pAlsoPort1 = nullptr;
-    pAlsoPort1 = provider.getPort();
+    pAlsoPort1 = provider.getSerialPort();
     ASSERT_FALSE(pAlsoPort1 == nullptr);
     ASSERT_TRUE(port1Id == pAlsoPort1->id());
 
     ayisakov::framework::ISerialPort *pPort3 = nullptr;
-    pPort3 = provider.getPort();
+    pPort3 = provider.getSerialPort();
     ASSERT_FALSE(pPort3 == nullptr);
     std::string port3Id = pPort3->id();
     ASSERT_FALSE(port3Id == port1Id);

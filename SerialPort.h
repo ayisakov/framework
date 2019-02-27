@@ -86,6 +86,11 @@ class SerialPort : public ISerialPort
     /**
      * Perform a blocking read operation
      *
+     * WARNING:
+     * This operation will block if there is nothing to read.
+     * A full buffer is not an indication that there is more
+     * data waiting to be read.
+     *
      * @return 0 on success, nonzero error code on failure
      */
     virtual int readSync(IReadBuffer &readBuf) override;

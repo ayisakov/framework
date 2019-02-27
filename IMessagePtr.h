@@ -8,7 +8,7 @@ namespace ayisakov
 {
 namespace framework
 {
-    typedef std::unique_ptr<ayisakov::framework::IMessage> IMessagePtr;
+using IMessagePtr = std::unique_ptr<IMessage>;
 }
 } // namespace ayisakov
 

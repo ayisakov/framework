@@ -1,6 +1,8 @@
 #ifndef IIOPROVIDER_H
 #define IIOPROVIDER_H
 
+#include <functional>
+
 namespace ayisakov
 {
 namespace framework
@@ -8,9 +10,9 @@ namespace framework
 class IIOListener;
 class ISerialPort;
 /**
- * The IOProvider is responsible for the creation and
- * destruction of all serial ports.
+ * The IOProvider is an I/O microservice.
  */
+using Handler = std::function<void(void)>;
 class IIOProvider
 {
   public:
@@ -24,7 +26,7 @@ class IIOProvider
      * NEVER attempt to delete the object to which a pointer
      * has been received using this function.
      */
-    virtual ISerialPort *getPort() = 0;
+    virtual ISerialPort *getSerialPort() = 0;
 
     // Indicate to the provider that the port is no longer being used
     virtual void release(const std::string &portId) = 0;
@@ -53,6 +55,14 @@ class IIOProvider
      * callbacks will run in the thread that calls this function.
      */
     virtual int dispatchEvents(IIOListener *pListener) = 0;
+
+    /**
+     * Queue up a custom event handler for deferred execution.
+     * The handler will be invoked in during a call to
+     * dispatchEvents.
+     *
+     */
+    virtual int postEvent(const Handler &handler) = 0;
 };
 } // namespace framework
 } // namespace ayisakov
