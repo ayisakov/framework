@@ -22,8 +22,8 @@ class IIOListener
     virtual ~IIOListener() {}
 
     /**
-     * Set a serial port provider, so that this listener can
-     * dispatch events for its ports.
+     * Set an I/O provider, so that this listener can
+     * dispatch its events.
      * Only one provider can be set at a time. Attempting to set
      * more than one provider will return an error code.
      *

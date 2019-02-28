@@ -63,6 +63,9 @@ void ayisakov::framework::SerialPort::release()
 int ayisakov::framework::SerialPort::writeAsync(IWriteBufferPtr &pWriteBuf,
                                                 const WriteCallback &callback)
 {
+    // TODO: implement a version of this function that uses boost::asio::async_read_until()
+    // and set a busy flag when the operation begins to make sure that no calls to any version
+    // of the read function either fail or become queued until this operation completes
     if(!pWriteBuf) return -1; // empty container
 
     // register this buffer, making sure tag is unique
