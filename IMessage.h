@@ -14,13 +14,13 @@ namespace ayisakov
 {
 namespace framework
 {
-class IMessageReceiver;
+    //typename IMessageSink;
 class IMessage
 {
   public:
     IMessage() {}
     virtual std::string toString() const = 0;
-    virtual IMessageReceiver *recipient() const = 0;
+    //    virtual IMessageSink *recipient() const = 0;
     virtual ~IMessage() {}
 };
 

@@ -33,7 +33,7 @@ const std::uint8_t *ayif::UniqueWriteBuffer::contents()
 
 ayif::BufferProxy ayif::UniqueWriteBuffer::unwrittenContents()
 {
-    return BufferProxy(contents()[written], length() - bytesWritten());
+    return BufferProxy(&(contents()[bytesWritten()]), length() - bytesWritten());
 }
 
 void ayif::UniqueWriteBuffer::bytesWritten(std::size_t written)
@@ -43,6 +43,11 @@ void ayif::UniqueWriteBuffer::bytesWritten(std::size_t written)
             "Bytes written is greater than buffer length");
     }
     m_bytesWritten = written;
+}
+
+std::size_t ayif::UniqueWriteBuffer::bytesWritten()
+{
+    return m_bytesWritten;
 }
 
 void ayif::UniqueWriteBuffer::error(BufferErrorCode code) { m_errorCode = code; }

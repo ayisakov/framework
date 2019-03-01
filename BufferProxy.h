@@ -1,6 +1,8 @@
 #ifndef BUFFERPROXY_H
 #define BUFFERPROXY_H
 
+#include "IBuffer.h"
+
 namespace ayisakov
 {
 namespace framework

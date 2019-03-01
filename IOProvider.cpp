@@ -1,17 +1,18 @@
 #include "IOProvider.h"
 #include "IOListener.h"
+#include "RelTimerMs.h"
+#include "ScopeSetter.h"
 #include "SerialPort.h"
 
+namespace ayif = ayisakov::framework;
 
 ayisakov::framework::IOProvider::IOProvider()
-: m_listener(nullptr)
+: m_listener(nullptr), m_dispatching(false)
 {
 }
 
 ayisakov::framework::IOProvider::~IOProvider()
 {
-    // Stop the io_service/context, dispatching all outstanding events
-    m_pWork.reset();
     // Remove reference to this in a listener, if one exists
     if(m_listener) {
         m_listener->unsubscribe(this);
@@ -81,22 +82,47 @@ int ayisakov::framework::IOProvider::removeListener(ayisakov::framework::IIOList
     return 0;
 }
 
-int ayisakov::framework::IOProvider::dispatchEvents(ayisakov::framework::IIOListener *pListener)
+ayif::ITimerPtr
+ayisakov::framework::IOProvider::setTimer(unsigned int ms, TimerHandler &callback)
+{
+    ITimerPtr pTimer(new RelTimerMs(m_ioContext, ms, callback));
+}
+
+int ayif::IOProvider::postEvent(const Handler &handler)
+{
+    m_ioContext.post(handler);
+}
+
+int ayisakov::framework::IOProvider::dispatchEvents(ayisakov::framework::IIOListener *pListener,
+                                                    bool continuously)
 {
     if(pListener != m_listener) {
         return -1; // listeners must match if registered
     }
 
-    m_pWork = std::unique_ptr<boost::asio::io_service::work>(
-        new boost::asio::io_service::work(m_ioContext));
-    while(true) {
+    if(m_dispatching) {
+        return -2; // multiple simultaneous invocations are not allowed
+    }
+
+    // set dispatching to true and reset at scope exit
+    ayif::ScopeSetter<bool> dispSetter(m_dispatching, true);
+
+    std::unique_ptr<boost::asio::io_service::work> pWork(nullptr);
+    if(continuously) {
+        // Needed to keep io_service::run() from returning when
+        // there are no outstanding asynchronous operations
+        pWork = std::unique_ptr<boost::asio::io_service::work>(
+            new boost::asio::io_service::work(m_ioContext));
+    }
+    while(true) { // in a loop so that non-fatal exceptions can be handled without exiting
         try {
-            // Block here until stopped
+            // Block here until stopped if running continuously
+            // or until all handlers have been called if not
             m_ioContext.run();
-            break; // normal exit
-        } catch(std::exception &e) {
+            break;                   // normal exit
+        } catch(std::exception &e) { // TODO: only catch Boost-specific exceptions here; the rest should bubble up
             // TODO: deal with exception
-            return -1;
+            return -1; // TODO: only do this for fatal exceptions
         }
     }
     return 0;

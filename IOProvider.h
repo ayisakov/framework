@@ -28,6 +28,10 @@ class IOProvider : public IIOProvider
     // Indicate to the provider that the port is no longer being used
     virtual void release(const std::string &portId) override;
 
+    // Set a timer
+    virtual ITimerPtr setTimer(unsigned milliseconds,
+                               TimerHandler &callback) override;
+
     /**
      * Register a listener that will process events on ports
      * managed by this provider. In order to be notified about
@@ -46,14 +50,22 @@ class IOProvider : public IIOProvider
     virtual int removeListener(IIOListener *pListener) override;
 
     /**
+     * Queue up a custom event handler for deferred execution.
+     * The handler will be invoked in during a call to
+     * dispatchEvents.
+     *
+     */
+    virtual int postEvent(const Handler &handler) override;
+
+    /**
      * Wait for events on sockets managed by this provider.
      * This function should be called in the context of the
      * thread responsible for dispatching events. All registered
      * callbacks will run in the thread that calls this function.
      *
      */
-    virtual int dispatchEvents(IIOListener *pListener) override;
-
+    virtual int dispatchEvents(IIOListener *pListener,
+                               bool continuously = true) override;
 
   private:
     // Ports, hashed by a unique id with which they are tagged
@@ -68,9 +80,8 @@ class IOProvider : public IIOProvider
     // The I/O context
     boost::asio::io_service m_ioContext;
 
-    // Needed to keep io_service::run() from returning when there
-    // are no outstanding asynchronous operations
-    std::unique_ptr<boost::asio::io_service::work> m_pWork;
+    // true if an invocation of dispatchEvents has not returned
+    bool m_dispatching;
 };
 } // namespace framework
 } // namespace ayisakov

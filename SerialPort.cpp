@@ -140,8 +140,8 @@ int ayisakov::framework::SerialPort::readSync(IReadBuffer &readBuf)
 {
     try {
         boost::asio::read(m_port,
-                          boost::asio::buffer(readbuf.contents(),
-                                              readbuf.length()));
+                          boost::asio::buffer(readBuf.contents(),
+                                              readBuf.length()));
     } catch (std::exception &e) {
         return -1;
     }

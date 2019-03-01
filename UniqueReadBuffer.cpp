@@ -10,7 +10,7 @@ ayif::UniqueReadBuffer::UniqueReadBuffer(std::size_t length)
 
 ayif::UniqueReadBuffer::~UniqueReadBuffer() {}
 
-ayif::UniqueReadBuffer::length() { return m_data.size(); }
+std::size_t ayif::UniqueReadBuffer::length() { return m_data.size(); }
 
 ayif::BufferTag ayif::UniqueReadBuffer::tag()
 {

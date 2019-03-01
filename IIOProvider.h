@@ -2,6 +2,8 @@
 #define IIOPROVIDER_H
 
 #include <functional>
+#include <memory>
+#include "ITimer.h"
 
 namespace ayisakov
 {
@@ -13,6 +15,7 @@ class ISerialPort;
  * The IOProvider is an I/O microservice.
  */
 using Handler = std::function<void(void)>;
+using ITimerPtr = std::shared_ptr<ITimer>;
 class IIOProvider
 {
   public:
@@ -30,6 +33,10 @@ class IIOProvider
 
     // Indicate to the provider that the port is no longer being used
     virtual void release(const std::string &portId) = 0;
+
+    // Set a timer
+    virtual ITimerPtr
+    setTimer(unsigned milliseconds, TimerHandler &callback) = 0;
 
     /**
      * Register a listener that will process events on ports
@@ -53,8 +60,14 @@ class IIOProvider
      * This function should be called in the context of the
      * thread responsible for dispatching events. All registered
      * callbacks will run in the thread that calls this function.
+     *
+     * @param continuously: if true, the call will block here
+     * until the I/O provider is stopped. If false, only
+     * outstanding events at the time of the call will be
+     * processed, after which the function will return
      */
-    virtual int dispatchEvents(IIOListener *pListener) = 0;
+    virtual int dispatchEvents(IIOListener *pListener,
+                               bool continuously = true) = 0;
 
     /**
      * Queue up a custom event handler for deferred execution.
