@@ -13,6 +13,9 @@ ayisakov::framework::IOProvider::IOProvider()
 
 ayisakov::framework::IOProvider::~IOProvider()
 {
+    if(!m_ioContext.stopped()) {
+        m_ioContext.stop();
+    }
     // Remove reference to this in a listener, if one exists
     if(m_listener) {
         m_listener->unsubscribe(this);

@@ -95,7 +95,7 @@ int ayisakov::framework::SerialPort::writeAsync(IWriteBufferPtr &pWriteBuf,
         return -3;
     }
 
-    auto handler = [=, this](const boost::system::error_code &error,
+    auto handler = [=](const boost::system::error_code &error,
                              std::size_t bytesWritten) {
  //       std::cout
  //           << "Entered SerialPort's internal write handler."
@@ -152,7 +152,7 @@ int ayisakov::framework::SerialPort::readAsync(IReadBufferPtr &pReadBuf,
         IReadBuffer *pBuf = pReadBuf.get();
         m_readBuffers[tag] = std::move(pReadBuf);
 
-        auto handler = [=, this](const boost::system::error_code &error,
+        auto handler = [=](const boost::system::error_code &error,
                                  std::size_t bytesRead) {
 //            std::cout
 //                << "Entered SerialPort's internal read handler."
