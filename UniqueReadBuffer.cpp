@@ -1,5 +1,5 @@
-#include "UniqueReadBuffer.h"
 #include <exception>
+#include "UniqueReadBuffer.h"
 
 namespace ayif = ayisakov::framework;
 
@@ -8,7 +8,10 @@ ayif::UniqueReadBuffer::UniqueReadBuffer(std::size_t length)
 {
 }
 
-ayif::UniqueReadBuffer::~UniqueReadBuffer() {}
+ayif::UniqueReadBuffer::~UniqueReadBuffer()
+{
+//    std::cout << "Destroying UniqueReadBuffer." << std::endl;
+}
 
 std::size_t ayif::UniqueReadBuffer::length() { return m_data.size(); }
 

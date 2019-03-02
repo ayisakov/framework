@@ -35,6 +35,8 @@ int ayisakov::framework::SerialPort::open(const std::string &device)
 {
     try {
         m_port.open(device);
+		// TODO: add setting baud rate to the intertace
+        m_port.set_option(boost::asio::serial_port_base::baud_rate(9600));
     } catch(boost::system::system_error &e) {
         return -1;
     }
@@ -73,28 +75,51 @@ int ayisakov::framework::SerialPort::writeAsync(IWriteBufferPtr &pWriteBuf,
     if(m_writeBuffers.find(tag) != m_writeBuffers.end()) {
         return -2; // tag not unique
     }
+    // save raw pointer before moving buffer to container
+    IWriteBuffer *pBuf = pWriteBuf.get();
+    if(!pBuf) {
+	// TODO: turn this and other debug messages into debug-level log function calls using the ILogger interface
+	// or use exceptions
+//        std::cout << "Could not retrieve plain pointer!" << std::endl;
+        return -4;
+    }
     m_writeBuffers[tag] = std::move(pWriteBuf);
+    IWriteBuffer *pUnused = m_writeBuffers[tag].get();
+    if(pUnused != pBuf) {
+//        std::cout << "Failed to store buffer pointer!" << std::endl;
+        return -3;
+    }
 
-    auto handler = [this, callback, tag](const boost::system::error_code &error,
-                                         std::size_t bytesWritten) {
-        IWriteBufferPtr &buf = m_writeBuffers[tag];
+    if(pBuf != m_writeBuffers[tag].get()) {
+        //std::cout << "Failed to store buffer pointer!" << std::endl;
+        return -3;
+    }
+
+    auto handler = [=, this](const boost::system::error_code &error,
+                             std::size_t bytesWritten) {
+ //       std::cout
+ //           << "Entered SerialPort's internal write handler."
+ //           << std::endl;
+        IWriteBuffer *buf = (m_writeBuffers[tag]).get();
+//        std::cout << "Wrote " << bytesWritten << " byte(s)" << std::endl;
         buf->bytesWritten(bytesWritten);
         buf->error(error.value());
         if(callback) {
-            callback(buf);
+            //            callback(buf);
+            callback(m_writeBuffers[tag]);
         }
         m_writeBuffers.erase(tag);
     };
-
-    m_port.async_write_some(boost::asio::buffer(pWriteBuf->contents(),
-                                                pWriteBuf->length()),
+    m_port.async_write_some(boost::asio::buffer(pBuf->contents(),
+                                                pBuf->length()),
                             handler);
+    return 0;
 }
 
 int ayisakov::framework::SerialPort::writeSync(IWriteBuffer &writeBuf)
 {
-    // TODO: it's probably cleaner to let any exceptions bubble up through
-    // this function instead
+    // TODO: it's probably cleaner to let any exceptions bubble
+    // up through this function instead
     try {
         std::size_t written =
             boost::asio::write(m_port,
@@ -112,60 +137,80 @@ int ayisakov::framework::SerialPort::writeSync(IWriteBuffer &writeBuf)
 int ayisakov::framework::SerialPort::readAsync(IReadBufferPtr &pReadBuf,
                                                const ReadCallback &callback)
 {
-    if(!pReadBuf) return -1; // empty container
+ //   std::cout << "Entered SerialPort::readAsync." << std::endl;
+    if(!pReadBuf) {
+ //       std::cout << "Bad read buffer smart pointer!" << std::endl;
+        return -1; // empty container
+	}
 
-    // register this buffer, making sure tag is unique
-    BufferTag tag = pReadBuf->tag();
-    if(m_readBuffers.find(tag) != m_readBuffers.end()) {
-        return -2; // tag not unique
-    }
-    m_readBuffers[tag] = std::move(pReadBuf);
-
-    auto handler = [this, callback, tag](const boost::system::error_code &error,
-                                         std::size_t bytesRead) {
-        IReadBufferPtr &buf = m_readBuffers[tag];
-        buf->bytesRead(bytesRead);
-        buf->error(error.value());
-        if(callback) {
-            callback(buf);
+        // register this buffer, making sure tag is unique
+        BufferTag tag = pReadBuf->tag();
+        if(m_readBuffers.find(tag) != m_readBuffers.end()) {
+            return -2; // tag not unique
         }
-        m_readBuffers.erase(tag);
-    };
-    m_port.async_read_some(boost::asio::buffer(pReadBuf->contents(),
-                                               pReadBuf->length()),
-                           handler);
-}
+        // grab a plain pointer before moving
+        IReadBuffer *pBuf = pReadBuf.get();
+        m_readBuffers[tag] = std::move(pReadBuf);
 
-int ayisakov::framework::SerialPort::readSync(IReadBuffer &readBuf)
-{
-    try {
-        boost::asio::read(m_port,
-                          boost::asio::buffer(readBuf.contents(),
-                                              readBuf.length()));
-    } catch (std::exception &e) {
-        return -1;
+        auto handler = [=, this](const boost::system::error_code &error,
+                                 std::size_t bytesRead) {
+//            std::cout
+//                << "Entered SerialPort's internal read handler."
+//                << std::endl;
+            IReadBufferPtr &buf = m_readBuffers[tag];
+            if(!buf) {
+//                std::cout << "Failed to retrieve the read "
+//                             "buffer using smart pointer!"
+//                          << std::endl;
+                return;
+            }
+//           std::cout << "Read " << bytesRead << " byte(s)." << std::endl;
+            buf->bytesRead(bytesRead);
+            buf->error(error.value());
+            if(callback) {
+                callback(buf);
+            }
+            m_readBuffers.erase(tag);
+        };
+        m_port.async_read_some(boost::asio::buffer(pBuf->contents(),
+                                                   pBuf->length()),
+                               handler);
+        return 0;
     }
-    return 0;
-}
 
-void ayisakov::framework::SerialPort::reset() { m_port.close(); }
+    int ayisakov::framework::SerialPort::readSync(IReadBuffer & readBuf)
+    {
+        try {
+            boost::asio::read(m_port,
+                              boost::asio::buffer(readBuf.contents(),
+                                                  readBuf.length()));
+        } catch(std::exception &e) {
+            return -1;
+        }
+        return 0;
+    }
 
-// void ayisakov::framework::SerialPort::onWriteSuccess(int bytesWritten)
-//{
-//    // TODO: implement (e.g. by posting a message to the registered sink)
-//}
-//
-// void ayisakov::framework::SerialPort::onWriteFail(int errorCode)
-//{
-//    // TODO: implement
-//}
-//
-// void ayisakov::framework::SerialPort::onReadSuccess(const char *buffer, size_t len)
-//{
-//    // TODO: implement
-//}
-//
-// void ayisakov::framework::SerialPort::onReadFail(int errorCode)
-//{
-//    // TODO: implement
-//}
+    void ayisakov::framework::SerialPort::reset()
+    {
+        m_port.close();
+    }
+
+    // void ayisakov::framework::SerialPort::onWriteSuccess(int bytesWritten)
+    //{
+    //    // TODO: implement (e.g. by posting a message to the registered sink)
+    //}
+    //
+    // void ayisakov::framework::SerialPort::onWriteFail(int errorCode)
+    //{
+    //    // TODO: implement
+    //}
+    //
+    // void ayisakov::framework::SerialPort::onReadSuccess(const char *buffer, size_t len)
+    //{
+    //    // TODO: implement
+    //}
+    //
+    // void ayisakov::framework::SerialPort::onReadFail(int errorCode)
+    //{
+    //    // TODO: implement
+    //}

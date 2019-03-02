@@ -17,8 +17,6 @@ ayisakov::framework::RelTimerMs::~RelTimerMs() {}
 void ayisakov::framework::RelTimerMs::start()
 {
     m_timer.expires_from_now(boost::posix_time::milliseconds(m_waitMsec));
-    //    std::function<void(const boost::system::error_code &)> cb =
-    //        std::bind(&ayif::RelTimerMs::handler, this);
     m_timer.async_wait(boost::bind(&ayisakov::framework::RelTimerMs::handler,
                                    this, boost::asio::placeholders::error));
 }
@@ -30,7 +28,7 @@ void ayisakov::framework::RelTimerMs::cancel()
 
 void ayisakov::framework::RelTimerMs::handler(const boost::system::error_code &ec)
 {
-    if(ec) {
+    if(ec != boost::asio::error::operation_aborted) {  // a canceled timer is fine
         throw std::runtime_error(ec.message());
     }
     if(m_userHandler) {

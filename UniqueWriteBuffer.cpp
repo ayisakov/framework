@@ -1,5 +1,5 @@
-#include "UniqueWriteBuffer.h"
 #include <exception>
+#include "UniqueWriteBuffer.h"
 
 namespace ayif = ayisakov::framework;
 
@@ -13,7 +13,10 @@ ayisakov::framework::UniqueWriteBuffer::UniqueWriteBuffer(const std::string &dat
 {
 }
 
-ayisakov::framework::UniqueWriteBuffer::~UniqueWriteBuffer() {}
+ayisakov::framework::UniqueWriteBuffer::~UniqueWriteBuffer()
+{
+//    std::cout << "Destroying UniqueWriteBuffer." << std::endl;
+}
 
 std::size_t ayif::UniqueWriteBuffer::length()
 {

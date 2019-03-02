@@ -86,11 +86,13 @@ ayif::ITimerPtr
 ayisakov::framework::IOProvider::setTimer(unsigned int ms, TimerHandler &callback)
 {
     ITimerPtr pTimer(new RelTimerMs(m_ioContext, ms, callback));
+    return pTimer;
 }
 
 int ayif::IOProvider::postEvent(const Handler &handler)
 {
     m_ioContext.post(handler);
+    return 0;
 }
 
 int ayisakov::framework::IOProvider::dispatchEvents(ayisakov::framework::IIOListener *pListener,
@@ -114,14 +116,24 @@ int ayisakov::framework::IOProvider::dispatchEvents(ayisakov::framework::IIOList
         pWork = std::unique_ptr<boost::asio::io_service::work>(
             new boost::asio::io_service::work(m_ioContext));
     }
+	// If the context was run non-continuously, it needs to be reset before the next invocation
+    if(m_ioContext.stopped()) {
+        m_ioContext.reset();
+    }
     while(true) { // in a loop so that non-fatal exceptions can be handled without exiting
         try {
             // Block here until stopped if running continuously
             // or until all handlers have been called if not
             m_ioContext.run();
+//            std::cout
+//                << "Returned from boost::asio::io_service::run..."
+//                << std::endl;
             break;                   // normal exit
         } catch(std::exception &e) { // TODO: only catch Boost-specific exceptions here; the rest should bubble up
             // TODO: deal with exception
+//            std::cout << "Exception from "
+//                         "boost::asio::io_service::run: "
+//                      << e.what() << std::endl;
             return -1; // TODO: only do this for fatal exceptions
         }
     }
