@@ -76,6 +76,11 @@ class IIOProvider
      *
      */
     virtual int postEvent(const Handler &handler) = 0;
+
+    /**
+     * Stop dispatching events
+     */
+    virtual void stop() = 0;
 };
 } // namespace framework
 } // namespace ayisakov

@@ -13,9 +13,7 @@ ayisakov::framework::IOProvider::IOProvider()
 
 ayisakov::framework::IOProvider::~IOProvider()
 {
-    if(!m_ioContext.stopped()) {
-        m_ioContext.stop();
-    }
+    stop();
     // Remove reference to this in a listener, if one exists
     if(m_listener) {
         m_listener->unsubscribe(this);
@@ -141,4 +139,11 @@ int ayisakov::framework::IOProvider::dispatchEvents(ayisakov::framework::IIOList
         }
     }
     return 0;
+}
+
+void ayif::IOProvider::stop()
+{
+    if(!m_ioContext.stopped()) {
+        m_ioContext.stop();
+    }
 }

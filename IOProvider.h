@@ -67,6 +67,11 @@ class IOProvider : public IIOProvider
     virtual int dispatchEvents(IIOListener *pListener,
                                bool continuously = true) override;
 
+    /**
+     * Stop dispatching events
+     */
+    virtual void stop() override;
+
   private:
     // Ports, hashed by a unique id with which they are tagged
     std::unordered_map<boost::uuids::uuid, std::unique_ptr<ISerialPort>, uuid_hash> m_ports;
