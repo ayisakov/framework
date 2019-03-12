@@ -3,6 +3,7 @@
 
 #include <atomic>
 #include <thread>
+#include <functional>
 #include "IAsyncRunner.h"
 
 namespace ayisakov
@@ -12,7 +13,9 @@ namespace framework
 class ThreadRunner : public IAsyncRunner
 {
   public:
+    using CompletionHandler = std::function<void(int)>;
     ThreadRunner(IRunnable &task);
+    ThreadRunner(IRunnable &task, const CompletionHandler &handler);
     virtual ~ThreadRunner();
     /**
      * Launch asynchronously, and do not block once started.
@@ -39,6 +42,7 @@ class ThreadRunner : public IAsyncRunner
     std::thread m_thread;
     std::atomic<bool> m_running;
     std::atomic<int> m_retval;
+    CompletionHandler m_userHandler;
 };
 } // namespace framework
 } // namespace ayisakov

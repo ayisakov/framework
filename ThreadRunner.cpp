@@ -10,6 +10,11 @@ ayisakov::framework::ThreadRunner::ThreadRunner(IRunnable &task)
 : IAsyncRunner(task), m_running(false), m_retval(0)
 {
 }
+ayisakov::framework::ThreadRunner::ThreadRunner(IRunnable &task,
+                                                const CompletionHandler &handler)
+: ThreadRunner(task), m_userHandler(handler)
+{
+}
 
 ayisakov::framework::ThreadRunner::~ThreadRunner()
 {
@@ -41,6 +46,12 @@ int ayisakov::framework::ThreadRunner::run()
 #endif // FRAMEWORK_TASK_DEBUG
     m_running = false;
     m_retval = ret;
+
+    // notify of completion, if using notification callback
+    if(m_userHandler) {
+        m_userHandler(ret);
+    }
+
     return ret;
 }
 
