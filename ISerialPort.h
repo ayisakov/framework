@@ -73,6 +73,18 @@ class ISerialPort
                           const ReadCallback &callback) = 0;
 
     /**
+     * Begin an asynchronous read operation that will be completed
+     * when a substring of the data in the read buffer matches
+     * the regular expression, transferring
+     * ownership of the buffer to the port.
+     * Upon completion of the read operation, the buffer
+     * will be returned to the caller via the callback.
+     */
+    virtual int readAsync(IReadBufferPtr &pReadBuf,
+                          const std::string &regex,
+                          const ReadCallback &callback) = 0;
+
+    /**
      * Perform a blocking read operation
      *
      * @return 0 on success, nonzero error code on failure

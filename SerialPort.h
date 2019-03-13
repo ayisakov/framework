@@ -6,8 +6,8 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <unordered_map>
-#include "ISerialPort.h"
 #include "IReadBuffer.h"
+#include "ISerialPort.h"
 #include "IWriteBuffer.h"
 
 namespace ayisakov
@@ -84,6 +84,18 @@ class SerialPort : public ISerialPort
                           const ReadCallback &callback) override;
 
     /**
+     * Begin an asynchronous read operation that will be completed
+     * when a substring of the data in the read buffer matches
+     * the regular expression, transferring
+     * ownership of the buffer to the port.
+     * Upon completion of the read operation, the buffer
+     * will be returned to the caller via the callback.
+     */
+    virtual int readAsync(IReadBufferPtr &pReadBuf,
+                          const std::string &regex,
+                          const ReadCallback &callback) override;
+
+    /**
      * Perform a blocking read operation
      *
      * WARNING:
@@ -110,6 +122,13 @@ class SerialPort : public ISerialPort
     //    virtual void onWriteFail(int errorCode) override;
     //    virtual void onReadSuccess(const char *buffer, size_t len) override;
     //    virtual void onReadFail(int errorCode) override;
+
+  protected:
+    IReadBuffer *regBuffer(IReadBufferPtr &pReadBuf);
+
+    void onReadInternal(ReadCallback userCallback,
+                        const boost::system::error_code &ec,
+                        std::size_t bytesRead);
 
   private:
     IMessageSink *m_pSink;
