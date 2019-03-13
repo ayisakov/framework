@@ -119,46 +119,67 @@ int main(int argc, char **argv, char *envp[])
         std::cout << "provider.dispatchEvents returned " << dispRet << std::endl;
         //     if(write successful)
         if(!bWriteTimedOut && bWriteSuccess) {
-            //     Set timeout timer
-            std::cout << "Setting read timeout timer." << std::endl;
-            ayif::TimerHandler onReadTimeout = [&](ayif::TimerRetCode ret) {
-                std::cout << "Entered read timeout handler." << std::endl;
-                if(!ret && !bReadSuccess) {
-                    bReadTimedOut = true;
-                }
-            };
-            ayif::ITimerPtr readTimeout =
-                provider.setTimer(timeout, onReadTimeout);
-            readTimeout->start();
-            //         Begin async read
-            ayif::IReadBufferPtr readbuf(new ayif::UniqueReadBuffer(1024));
-            std::cout << "Starting asynchronous read." << std::endl;
-            int readRet = port->readAsync(readbuf, [&](ayif::IReadBufferPtr &pBuf) {
-                std::cout << "Entered read handler." << std::endl;
-                readTimeout->cancel();
-                bReadSuccess = !pBuf->error();
-				if(bReadSuccess) {
-					std::cout << "Reported successful read." << std::endl;
-                    pBuf.swap(readbuf);
+            bool keepReading = true;
+            std::ostringstream readStream;
+            while(keepReading) {
+				//     Set timeout timer
+				std::cout << "Setting read timeout timer." << std::endl;
+				ayif::TimerHandler onReadTimeout = [&](ayif::TimerRetCode ret) {
+					std::cout << "Entered read timeout handler." << std::endl;
+					if(!ret && !bReadSuccess) {
+						bReadTimedOut = true;
+					}
+				};
+				ayif::ITimerPtr readTimeout =
+					provider.setTimer(timeout, onReadTimeout);
+				readTimeout->start();
+
+				//         Begin async read
+
+				ayif::IReadBufferPtr readbuf(new ayif::UniqueReadBuffer(1024));
+				std::cout << "Starting asynchronous read." << std::endl;
+				int readRet = port->readAsync(readbuf, [&](ayif::IReadBufferPtr &pBuf) {
+					std::cout << "Entered read handler." << std::endl;
+					readTimeout->cancel();
+					bReadSuccess = !pBuf->error();
+					if(bReadSuccess) {
+						std::cout << "Reported successful read." << std::endl;
+						pBuf.swap(readbuf);
+					}
+				});
+				if(readRet) {
+					std::cout << "Failed to initiate asynchronous "
+								 "read operation!"
+							  << std::endl;
+					return -8;
 				}
-            });
-            if(readRet) {
-                std::cout << "Failed to initiate asynchronous "
-                             "read operation!"
-                          << std::endl;
-                return -8;
-            }
-            //         Dispatch a round of events
-            std::cout << "Dispatching events." << std::endl;
-            dispRet = provider.dispatchEvents(&listener, false);
-			std::cout << "provider.dispatchEvents returned " << dispRet << std::endl;
+				//         Dispatch a round of events
+				std::cout << "Dispatching events." << std::endl;
+				dispRet = provider.dispatchEvents(&listener, false);
+				std::cout << "provider.dispatchEvents returned " << dispRet << std::endl;
+
+				if(bReadTimedOut || !bReadSuccess) {
+                    keepReading = false;
+                    break;
+                }
+
+				std::string chunk(reinterpret_cast<const char *>(
+									  readbuf->contents()),
+								  readbuf->bytesRead());
+                readStream << chunk;
+
+				if(chunk.back() == '?' || chunk.back() == '>') {
+					keepReading = false;
+				}
+			}
+            std::string message = readStream.str();
+
+
             //         if(read successful)
             if(!bReadTimedOut && bReadSuccess) {
                 //             display result
                 std::cout << "Received: "
-                          << std::string(reinterpret_cast<const char *>(
-                                             readbuf->contents()),
-                                         readbuf->bytesRead())
+                          << message
                           << std::endl;
                 // prompt user for input
                 bool again = true;

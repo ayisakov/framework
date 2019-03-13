@@ -1,6 +1,5 @@
 #include "SerialPort.h"
 #include <boost/bind.hpp>
-#include <boost/regex.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include "IIOProvider.h"
@@ -149,27 +148,9 @@ int ayisakov::framework::SerialPort::readAsync(IReadBufferPtr &pReadBuf,
     m_port.async_read_some(
         boost::asio::buffer(pBuf->contents(), pBuf->length()),
         boost::bind(&SerialPort::onReadInternal, this, callback,
+                    pBuf->tag(),
                     boost::asio::placeholders::error,
                     boost::asio::placeholders::bytes_transferred));
-    return 0;
-}
-
-int ayif::SerialPort::readAsync(IReadBufferPtr &pReadBuf,
-                                const std::string &regex,
-                                const ReadCallback &callback)
-{
-    IReadBuffer *pBuf = regBuffer(pReadBuf);
-    if(!pBuf) {
-        return -1;
-    }
-
-    boost::asio::async_read_until(
-        m_port, boost::asio::buffer(pBuf->contents(), pBuf->length()),
-        boost::regex(regex),
-        boost::bind(&SerialPort::onReadInternal, this, callback,
-                    boost::asio::placeholders::error,
-                    boost::asio::placeholders::bytes_transferred));
-
     return 0;
 }
 
@@ -190,8 +171,8 @@ ayif::IReadBuffer *ayif::SerialPort::regBuffer(IReadBufferPtr &pReadBuf)
     return pBuf; // success
 }
 
-void ayif::SerialPort::onReadInternal(ReadCallback callback,
-                                      const boost::system::error_code &ec,
+void ayif::SerialPort::onReadInternal(ReadCallback callback, BufferTag tag,
+                                      const boost::system::error_code &error,
                                       std::size_t bytesRead)
 {
     IReadBufferPtr &buf = m_readBuffers[tag];

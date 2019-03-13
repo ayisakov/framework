@@ -84,18 +84,6 @@ class SerialPort : public ISerialPort
                           const ReadCallback &callback) override;
 
     /**
-     * Begin an asynchronous read operation that will be completed
-     * when a substring of the data in the read buffer matches
-     * the regular expression, transferring
-     * ownership of the buffer to the port.
-     * Upon completion of the read operation, the buffer
-     * will be returned to the caller via the callback.
-     */
-    virtual int readAsync(IReadBufferPtr &pReadBuf,
-                          const std::string &regex,
-                          const ReadCallback &callback) override;
-
-    /**
      * Perform a blocking read operation
      *
      * WARNING:
@@ -126,7 +114,7 @@ class SerialPort : public ISerialPort
   protected:
     IReadBuffer *regBuffer(IReadBufferPtr &pReadBuf);
 
-    void onReadInternal(ReadCallback userCallback,
+    void onReadInternal(ReadCallback userCallback, BufferTag tag,
                         const boost::system::error_code &ec,
                         std::size_t bytesRead);
 
