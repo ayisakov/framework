@@ -14,8 +14,8 @@ class IIOProvider;
  * objects that dispatch events for serial ports.
  */
 class IIOListener
-: public ayisakov::framework::IRunnable,
-  public ayisakov::framework::IMessageSink
+: public ayisakov::framework::IRunnable
+//  ,public ayisakov::framework::IMessageSink
 {
   public:
     IIOListener() {}

@@ -81,8 +81,8 @@ bool ayisakov::framework::IOListener::isRunning()
     return m_isRunning;
 }
 
-int ayisakov::framework::IOListener::send(IMessagePtr &message)
-{
-    // TODO: implement
-    return -1;
-}
+//int ayisakov::framework::IOListener::send(IMessagePtr &message)
+//{
+//    // TODO: implement
+//    return -1;
+//}

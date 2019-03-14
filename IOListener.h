@@ -37,7 +37,7 @@ class IOListener : public IIOListener
      * @param [in] message the message
      * @return 0 on success
      */
-    virtual int send(IMessagePtr &message) override;
+//    virtual int send(IMessagePtr &message) override;
 
   private:
     IIOProvider *m_pProvider;

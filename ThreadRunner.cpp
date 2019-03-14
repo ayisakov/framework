@@ -12,8 +12,9 @@ ayisakov::framework::ThreadRunner::ThreadRunner(IRunnable &task)
 }
 ayisakov::framework::ThreadRunner::ThreadRunner(IRunnable &task,
                                                 const CompletionHandler &handler)
-: ThreadRunner(task), m_userHandler(handler)
+: ThreadRunner(task)
 {
+    m_userHandler = handler;
 }
 
 ayisakov::framework::ThreadRunner::~ThreadRunner()
