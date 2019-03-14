@@ -15,9 +15,10 @@ ayisakov::framework::IOProvider::~IOProvider()
 {
     stop();
     // Remove reference to this in a listener, if one exists
-    if(m_listener) {
-        m_listener->unsubscribe(this);
-    }
+	// TODO: this causes a segfault in certain order of destructor calls. Fix.
+//    if(m_listener) {
+//        m_listener->unsubscribe(this);
+//    }
 }
 
 ayisakov::framework::ISerialPort *ayisakov::framework::IOProvider::getSerialPort()
@@ -110,16 +111,17 @@ int ayisakov::framework::IOProvider::dispatchEvents(ayisakov::framework::IIOList
     // set dispatching to true and reset at scope exit
     ayif::ScopeSetter<bool> dispSetter(m_dispatching, true);
 
+	// If the context was run non-continuously, it needs to be reset before the next invocation
+    if(m_ioContext.stopped()) {
+        m_ioContext.reset();
+    }
+
     std::unique_ptr<boost::asio::io_service::work> pWork(nullptr);
     if(continuously) {
         // Needed to keep io_service::run() from returning when
         // there are no outstanding asynchronous operations
         pWork = std::unique_ptr<boost::asio::io_service::work>(
             new boost::asio::io_service::work(m_ioContext));
-    }
-	// If the context was run non-continuously, it needs to be reset before the next invocation
-    if(m_ioContext.stopped()) {
-        m_ioContext.reset();
     }
     while(true) { // in a loop so that non-fatal exceptions can be handled without exiting
         try {
