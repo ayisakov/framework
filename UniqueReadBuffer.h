@@ -30,6 +30,8 @@ class UniqueReadBuffer : public IReadBuffer
     void bytesRead(std::size_t read) override;
     // get number of bytes read into this buffer
     std::size_t bytesRead() override;
+    // access the contents as an STL string
+    virtual std::string str() override;
     // error code (e.g. from asynchronous buffer operation) (==0 if no error)
     virtual BufferErrorCode error() override;
     virtual void error(BufferErrorCode code) override;
