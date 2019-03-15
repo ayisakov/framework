@@ -16,9 +16,9 @@ ayisakov::framework::IOProvider::~IOProvider()
     stop();
     // Remove reference to this in a listener, if one exists
 	// TODO: this causes a segfault in certain order of destructor calls. Fix.
-//    if(m_listener) {
-//        m_listener->unsubscribe(this);
-//    }
+    if(m_listener) {
+        m_listener->unsubscribe(this);
+    }
 }
 
 ayisakov::framework::ISerialPort *ayisakov::framework::IOProvider::getSerialPort()
