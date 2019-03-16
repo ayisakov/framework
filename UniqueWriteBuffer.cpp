@@ -56,3 +56,9 @@ std::size_t ayif::UniqueWriteBuffer::bytesWritten()
 void ayif::UniqueWriteBuffer::error(BufferErrorCode code) { m_errorCode = code; }
 
 ayif::BufferErrorCode ayif::UniqueWriteBuffer::error() { return m_errorCode; }
+
+ayif::IWriteBufferPtr
+ayif::UniqueWriteBuffer::create(const std::string &data)
+{
+    return std::move(ayif::IWriteBufferPtr(new UniqueWriteBuffer(data)));
+}

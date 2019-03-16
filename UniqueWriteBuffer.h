@@ -22,6 +22,8 @@ class UniqueWriteBuffer : public IWriteBuffer
     UniqueWriteBuffer operator=(const UniqueWriteBuffer &orig) = delete;
     ~UniqueWriteBuffer();
 
+    static IWriteBufferPtr create(const std::string &data);
+
     // total number of bytes
     std::size_t length() override;
     // a unique tag
@@ -45,8 +47,8 @@ class UniqueWriteBuffer : public IWriteBuffer
     std::size_t m_bytesWritten;
     BufferErrorCode m_errorCode;
 };
-
 using UniqueWriteBufferPtr = std::unique_ptr<UniqueWriteBuffer>;
+
 } // namespace framework
 } // namespace ayisakov
 
