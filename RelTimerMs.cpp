@@ -39,7 +39,7 @@ void ayisakov::framework::RelTimerMs::handler(const boost::system::error_code &e
     }
 }
 
-bool ayisakov::framework::RelTimerMs::fail(TimerRetCode code)
+bool ayisakov::framework::RelTimerMs::fail(TimerRetCode code) const
 {
     if(code != rtms_success) {
         return true;
