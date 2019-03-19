@@ -35,7 +35,7 @@ class ISerialPort
      *
      * @return 0 on success; error code on failure
      */
-    virtual int open(const std::string &device) = 0;
+    virtual int open(const std::string &device, int baudRate) = 0;
 
     /**
      * Close the device

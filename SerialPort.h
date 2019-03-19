@@ -46,7 +46,7 @@ class SerialPort : public ISerialPort
      *
      * @return 0 on success; error code on failure
      */
-    virtual int open(const std::string &device) override;
+    virtual int open(const std::string &device, int baudRate) override;
 
     /**
      * Close the device

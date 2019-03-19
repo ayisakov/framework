@@ -34,12 +34,12 @@ std::string ayisakov::framework::SerialPort::id()
     return boost::uuids::to_string(uuid());
 }
 
-int ayisakov::framework::SerialPort::open(const std::string &device)
+int ayisakov::framework::SerialPort::open(const std::string &device,
+                                          int baudRate)
 {
     try {
         m_port.open(device);
-        // TODO: add setting baud rate to the intertace
-        m_port.set_option(boost::asio::serial_port_base::baud_rate(9600));
+        m_port.set_option(boost::asio::serial_port_base::baud_rate(baudRate));
     } catch(boost::system::system_error &e) {
         return -1;
     }
