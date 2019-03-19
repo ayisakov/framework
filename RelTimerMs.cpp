@@ -4,6 +4,9 @@
 
 namespace ayif = ayisakov::framework;
 
+static const int rtms_success = 0;
+static const int rtms_fail = -1;
+
 
 ayisakov::framework::RelTimerMs::RelTimerMs(boost::asio::io_service &ios,
                                             unsigned int msec,
@@ -34,4 +37,12 @@ void ayisakov::framework::RelTimerMs::handler(const boost::system::error_code &e
     if(m_userHandler) {
         m_userHandler(ec.value());
     }
+}
+
+bool ayisakov::framework::RelTimerMs::fail(TimerRetCode code)
+{
+    if(code != rtms_success) {
+        return true;
+    }
+    return false;
 }

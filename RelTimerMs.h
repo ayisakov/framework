@@ -16,6 +16,7 @@ class RelTimerMs : public ITimer
     virtual ~RelTimerMs();
     virtual void cancel() override;
     virtual void start() override;
+    virtual bool fail(TimerRetCode code) const override;
 
   protected:
     void handler(const boost::system::error_code &ec);

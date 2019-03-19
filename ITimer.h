@@ -24,6 +24,7 @@ class ITimer
     virtual ~ITimer() {}
     virtual void cancel() = 0;
     virtual void start() = 0;
+    virtual bool fail(TimerRetCode code) const = 0;
     //    virtual void start(ITimerHandler *handler) = 0;
 };
 } // namespace framework
