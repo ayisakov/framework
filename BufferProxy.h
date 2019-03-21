@@ -23,11 +23,11 @@ class BufferProxy : public IBuffer
     {
     }
     ~BufferProxy() {}
-    const uint8_t *contents() { return m_pBuffer; }
-    std::size_t length() { return m_length; }
-    BufferTag tag() { return reinterpret_cast<BufferTag>(this); }
+    const uint8_t *contents() const { return m_pBuffer; }
+    std::size_t length() const { return m_length; }
+    BufferTag tag() const { return reinterpret_cast<BufferTag>(this); }
     // error code (e.g. from asynchronous buffer operation) (==0 if no error)
-    virtual BufferErrorCode error() override
+    virtual BufferErrorCode error() const override
     {
         return BufferErrorCode(0);
     }

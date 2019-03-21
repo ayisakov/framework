@@ -36,7 +36,7 @@ class IIOProvider
 
     // Set a timer
     virtual ITimerPtr
-    setTimer(unsigned milliseconds, TimerHandler &callback) = 0;
+    setTimer(unsigned milliseconds, const TimerHandler &callback) = 0;
 
     /**
      * Register a listener that will process events on ports

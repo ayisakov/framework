@@ -19,9 +19,9 @@ class UniqueReadBuffer : public IReadBuffer
     ~UniqueReadBuffer();
 
     // total number of bytes
-    std::size_t length() override;
+    std::size_t length() const override;
     // a unique tag
-    BufferTag tag() override;
+    BufferTag tag() const override;
 
     // get a pointer to the beginning of the buffer
     uint8_t *contents() override;
@@ -29,11 +29,11 @@ class UniqueReadBuffer : public IReadBuffer
     // throws std::out_of_range if read > length()
     void bytesRead(std::size_t read) override;
     // get number of bytes read into this buffer
-    std::size_t bytesRead() override;
+    std::size_t bytesRead() const override;
     // access the contents as an STL string
     virtual std::string str() override;
     // error code (e.g. from asynchronous buffer operation) (==0 if no error)
-    virtual BufferErrorCode error() override;
+    virtual BufferErrorCode error() const override;
     virtual void error(BufferErrorCode code) override;
 
   private:

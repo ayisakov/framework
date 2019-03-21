@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include "IIOProvider.h"
+#include "ILogger.h"
 
 namespace ayisakov
 {
@@ -18,7 +19,7 @@ typedef boost::hash<boost::uuids::uuid> uuid_hash;
 class IOProvider : public IIOProvider
 {
   public:
-    IOProvider();
+    IOProvider(ILogger *pLogger);
     virtual ~IOProvider();
 
     // Create or obtain an available serial port and return
@@ -30,7 +31,7 @@ class IOProvider : public IIOProvider
 
     // Set a timer
     virtual ITimerPtr setTimer(unsigned milliseconds,
-                               TimerHandler &callback) override;
+                               const TimerHandler &callback) override;
 
     /**
      * Register a listener that will process events on ports
@@ -81,6 +82,9 @@ class IOProvider : public IIOProvider
 
     // A listener, if one is registered
     IIOListener *m_listener;
+
+	// A logger, if one is registered
+    ILogger *m_pLogger;
 
     // The I/O context
     boost::asio::io_service m_ioContext;

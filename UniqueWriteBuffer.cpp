@@ -18,18 +18,18 @@ ayisakov::framework::UniqueWriteBuffer::~UniqueWriteBuffer()
 //    std::cout << "Destroying UniqueWriteBuffer." << std::endl;
 }
 
-std::size_t ayif::UniqueWriteBuffer::length()
+std::size_t ayif::UniqueWriteBuffer::length() const
 {
     return m_data.length();
 }
 
-ayif::BufferTag ayif::UniqueWriteBuffer::tag()
+ayif::BufferTag ayif::UniqueWriteBuffer::tag() const
 {
     // the address is unique enough for current purposes
     return reinterpret_cast<BufferTag>(this);
 }
 
-const std::uint8_t *ayif::UniqueWriteBuffer::contents()
+const std::uint8_t *ayif::UniqueWriteBuffer::contents() const
 {
     return reinterpret_cast<const std::uint8_t *>(m_data.c_str());
 }
@@ -55,10 +55,14 @@ std::size_t ayif::UniqueWriteBuffer::bytesWritten()
 
 void ayif::UniqueWriteBuffer::error(BufferErrorCode code) { m_errorCode = code; }
 
-ayif::BufferErrorCode ayif::UniqueWriteBuffer::error() { return m_errorCode; }
+ayif::BufferErrorCode ayif::UniqueWriteBuffer::error() const { return m_errorCode; }
 
 ayif::IWriteBufferPtr
 ayif::UniqueWriteBuffer::create(const std::string &data)
 {
     return std::move(ayif::IWriteBufferPtr(new UniqueWriteBuffer(data)));
+}
+
+std::string ayif::UniqueWriteBuffer::str() const {
+    return m_data;
 }

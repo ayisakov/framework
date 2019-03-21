@@ -98,7 +98,7 @@ int main(int argc, char **argv, char *envp[])
     }
     // Open the port
     std::cout << "Attempting to open serial port " << portName << std::endl;
-    if(port->open(portName)) {
+    if(port->open(portName, 9600)) {
         std::cout << "Unable to open serial port " << portName << std::endl;
         return -3;
     }

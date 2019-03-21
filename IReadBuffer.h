@@ -21,7 +21,7 @@ class IReadBuffer : public IBuffer
     // set number of bytes read into this buffer
     virtual void bytesRead(std::size_t read) = 0;
     // get number of bytes read into this buffer
-    virtual std::size_t bytesRead() = 0;
+    virtual std::size_t bytesRead() const = 0;
     // access the contents as an STL string
     virtual std::string str() = 0;
 };

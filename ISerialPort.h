@@ -21,11 +21,6 @@ class ISerialPort
     virtual ~ISerialPort() {}
 
     /**
-     * Add a receiver to which events will be forwarded.
-     */
-    virtual void registerSink(IMessageSink *pSink) = 0;
-
-    /**
      * Get the id of this port
      */
     virtual std::string id() = 0;

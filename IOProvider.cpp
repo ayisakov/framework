@@ -6,8 +6,8 @@
 
 namespace ayif = ayisakov::framework;
 
-ayisakov::framework::IOProvider::IOProvider()
-: m_listener(nullptr), m_dispatching(false)
+ayisakov::framework::IOProvider::IOProvider(ILogger *pLogger)
+: m_listener(nullptr), m_dispatching(false), m_pLogger(pLogger)
 {
 }
 
@@ -31,7 +31,7 @@ ayisakov::framework::ISerialPort *ayisakov::framework::IOProvider::getSerialPort
     } else {
         // if no unused ports, then create a new port
         std::unique_ptr<SerialPort> created_derived(
-            new SerialPort(m_ioContext, this));
+            new SerialPort(m_ioContext, this, m_pLogger));
         boost::uuids::uuid id = created_derived->uuid();
         // TODO: make this safer. Check for clashes before inserting;
         // otherwise this operation can destroy referenced objects.
@@ -84,7 +84,7 @@ int ayisakov::framework::IOProvider::removeListener(ayisakov::framework::IIOList
 }
 
 ayif::ITimerPtr
-ayisakov::framework::IOProvider::setTimer(unsigned int ms, TimerHandler &callback)
+ayisakov::framework::IOProvider::setTimer(unsigned int ms, const TimerHandler &callback)
 {
     ITimerPtr pTimer(new RelTimerMs(m_ioContext, ms, callback));
     return pTimer;

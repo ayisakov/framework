@@ -9,6 +9,7 @@
 #include "IReadBuffer.h"
 #include "ISerialPort.h"
 #include "IWriteBuffer.h"
+#include "ILogger.h"
 
 namespace ayisakov
 {
@@ -23,13 +24,9 @@ class SerialPort : public ISerialPort
      * NOTE: Boost has renamed io_service to io_context in
      * version >= 1.66 (io_service remains as a typedef)
      */
-    SerialPort(boost::asio::io_service &context, IIOProvider *pProvider);
+    SerialPort(boost::asio::io_service &context, IIOProvider *pProvider,
+			   ILogger *pLogger);
     virtual ~SerialPort();
-
-    /**
-     * Add a receiver to which events will be forwarded.
-     */
-    virtual void registerSink(IMessageSink *pSink) override;
 
     /**
      * Get the id of this port
@@ -88,6 +85,7 @@ class SerialPort : public ISerialPort
      *
      * WARNING:
      * This operation will block if there is nothing to read.
+	 * It will also block until the entire buffer is full.
      * A full buffer is not an indication that there is more
      * data waiting to be read.
      *
@@ -118,8 +116,10 @@ class SerialPort : public ISerialPort
                         const boost::system::error_code &ec,
                         std::size_t bytesRead);
 
+	void log(const std::string &info);
+
   private:
-    IMessageSink *m_pSink;
+    ILogger *m_pLogger;
     IIOProvider *m_pProvider;
     boost::asio::serial_port m_port;
     boost::uuids::uuid m_uuid;

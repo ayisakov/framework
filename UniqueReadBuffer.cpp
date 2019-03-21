@@ -13,12 +13,12 @@ ayif::UniqueReadBuffer::~UniqueReadBuffer()
     //    std::cout << "Destroying UniqueReadBuffer." << std::endl;
 }
 
-std::size_t ayif::UniqueReadBuffer::length()
+std::size_t ayif::UniqueReadBuffer::length() const
 {
     return m_data.size();
 }
 
-ayif::BufferTag ayif::UniqueReadBuffer::tag()
+ayif::BufferTag ayif::UniqueReadBuffer::tag() const
 {
     // the address is unique enough for current purposes
     return reinterpret_cast<BufferTag>(this);
@@ -38,7 +38,7 @@ void ayif::UniqueReadBuffer::bytesRead(std::size_t read)
     m_bytesRead = read;
 }
 
-std::size_t ayif::UniqueReadBuffer::bytesRead()
+std::size_t ayif::UniqueReadBuffer::bytesRead() const
 {
     return m_bytesRead;
 }
@@ -48,13 +48,13 @@ void ayif::UniqueReadBuffer::error(BufferErrorCode code)
     m_errorCode = code;
 }
 
-ayif::BufferErrorCode ayif::UniqueReadBuffer::error()
+ayif::BufferErrorCode ayif::UniqueReadBuffer::error() const
 {
     return m_errorCode;
 }
 
 std::string ayif::UniqueReadBuffer::str()
 {
-    if(length == 0) return std::string("");
-    return std::string(reinterpret_cast<const char *>(contents(), length()));
+    if(length() == 0) return std::string("");
+    return std::string(reinterpret_cast<const char *>(contents()), bytesRead());
 }

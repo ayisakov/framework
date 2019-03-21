@@ -7,8 +7,9 @@
 namespace ayif = ayisakov::framework;
 
 ayisakov::framework::SerialPort::SerialPort(boost::asio::io_service &context,
-                                            IIOProvider *pProvider)
+                                            IIOProvider *pProvider, ILogger *pLogger)
 : m_pProvider(pProvider), m_port(boost::asio::serial_port(context)),
+  m_pLogger(pLogger),
   m_uuid(boost::uuids::random_generator()())
 {
 }
@@ -17,11 +18,6 @@ ayisakov::framework::SerialPort::~SerialPort()
 {
     // TODO: see if any clean-up is needed that is not
     // performed by the underlying object's destructor
-}
-
-void ayisakov::framework::SerialPort::registerSink(IMessageSink *pSink)
-{
-    m_pSink = pSink;
 }
 
 const boost::uuids::uuid &ayisakov::framework::SerialPort::uuid()
@@ -104,16 +100,18 @@ int ayisakov::framework::SerialPort::writeAsync(IWriteBufferPtr &pWriteBuf,
         //       std::cout
         //           << "Entered SerialPort's internal write handler."
         //           << std::endl;
-        IWriteBuffer *buf = (m_writeBuffers[tag]).get();
+        IWriteBufferPtr buf = std::move(m_writeBuffers[tag]);
+        m_writeBuffers.erase(tag);
         //        std::cout << "Wrote " << bytesWritten << " byte(s)" << std::endl;
         buf->bytesWritten(bytesWritten);
         buf->error(error.value());
         if(callback) {
             //            callback(buf);
-            callback(m_writeBuffers[tag]);
+            callback(buf);
         }
-        m_writeBuffers.erase(tag);
     };
+	
+	log("Writing to serial port [" + pBuf->str() + "]");
     m_port.async_write_some(boost::asio::buffer(pBuf->contents(),
                                                 pBuf->length()),
                             handler);
@@ -145,6 +143,7 @@ int ayisakov::framework::SerialPort::readAsync(IReadBufferPtr &pReadBuf,
     if(!pBuf) {
         return -1;
     }
+    log("Starting async read.");
     m_port.async_read_some(
         boost::asio::buffer(pBuf->contents(), pBuf->length()),
         boost::bind(&SerialPort::onReadInternal, this, callback,
@@ -175,7 +174,8 @@ void ayif::SerialPort::onReadInternal(ReadCallback callback, BufferTag tag,
                                       const boost::system::error_code &error,
                                       std::size_t bytesRead)
 {
-    IReadBufferPtr &buf = m_readBuffers[tag];
+    IReadBufferPtr buf = std::move(m_readBuffers[tag]);
+    m_readBuffers.erase(tag);
     if(!buf) {
         return;
     }
@@ -184,7 +184,6 @@ void ayif::SerialPort::onReadInternal(ReadCallback callback, BufferTag tag,
     if(callback) {
         callback(buf);
     }
-    m_readBuffers.erase(tag);
 }
 
 int ayisakov::framework::SerialPort::readSync(IReadBuffer &readBuf)
@@ -200,6 +199,12 @@ int ayisakov::framework::SerialPort::readSync(IReadBuffer &readBuf)
 }
 
 void ayisakov::framework::SerialPort::reset() { m_port.close(); }
+
+void ayisakov::framework::SerialPort::log(const std::string &info) 	{
+    if(m_pLogger) {
+        m_pLogger->log(info);
+    }
+}
 
 // void ayisakov::framework::SerialPort::onWriteSuccess(int bytesWritten)
 //{
