@@ -73,6 +73,9 @@ class IOProvider : public IIOProvider
      */
     virtual void stop() override;
 
+  protected:
+		void log(const std::string &msg);
+
   private:
     // Ports, hashed by a unique id with which they are tagged
     std::unordered_map<boost::uuids::uuid, std::unique_ptr<ISerialPort>, uuid_hash> m_ports;

@@ -31,7 +31,7 @@ void ayisakov::framework::RelTimerMs::cancel()
 
 void ayisakov::framework::RelTimerMs::handler(const boost::system::error_code &ec)
 {
-    if(ec != boost::asio::error::operation_aborted) {  // a canceled timer is fine
+    if(ec && ec != boost::asio::error::operation_aborted) {  // a canceled timer is fine
         throw std::runtime_error(ec.message());
     }
     if(m_userHandler) {

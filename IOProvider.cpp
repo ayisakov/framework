@@ -1,3 +1,4 @@
+#include <sstream>
 #include "IOProvider.h"
 #include "IOListener.h"
 #include "RelTimerMs.h"
@@ -133,9 +134,11 @@ int ayisakov::framework::IOProvider::dispatchEvents(ayisakov::framework::IIOList
             break;                   // normal exit
         } catch(std::exception &e) { // TODO: only catch Boost-specific exceptions here; the rest should bubble up
             // TODO: deal with exception
-//            std::cout << "Exception from "
-//                         "boost::asio::io_service::run: "
-//                      << e.what() << std::endl;
+            std::ostringstream logstream;
+            logstream << "Exception from "
+                         "boost::asio::io_service::run: "
+                      << e.what() << std::endl;
+            log(logstream.str());
             return -1; // TODO: only do this for fatal exceptions
         }
     }
@@ -147,4 +150,11 @@ void ayif::IOProvider::stop()
     if(!m_ioContext.stopped()) {
         m_ioContext.stop();
     }
+}
+
+void ayif::IOProvider::log(const std::string &msg)
+{
+    if(m_pLogger) {
+        m_pLogger->log(msg);
+	}
 }
