@@ -1,6 +1,8 @@
 #ifndef ILOGGER_H
 #define ILOGGER_H
 
+#include <string>
+
 /**
  * Author: Artem Isakov
  * The logger interface
