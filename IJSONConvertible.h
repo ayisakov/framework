@@ -24,7 +24,7 @@ class IJSONConvertible
     /**
      * Export state as JSON string
      */
-    virtual std::string toJSON() = 0;
+    virtual std::string toJSON() const = 0;
 };
 } // namespace framework
 } // namespace ayisakov
