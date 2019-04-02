@@ -1,7 +1,7 @@
 #ifndef IJSONCONVERTIBLE_H
 #define IJSONCONVERTIBLE_H
 
-#include <string>
+#include "../json/single_include/nlohmann/json.hpp"
 
 namespace ayisakov
 {
@@ -19,12 +19,12 @@ class IJSONConvertible
      *
      * @throw std::runtime_error if unable to parse
      */
-    virtual void fromJSON(const std::string& json) = 0;
+    virtual void fromJSON(const nlohmann::json &json) = 0;
 
     /**
      * Export state as JSON string
      */
-    virtual std::string toJSON() const = 0;
+    virtual nlohmann::json toJSON() const = 0;
 };
 } // namespace framework
 } // namespace ayisakov
