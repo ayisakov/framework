@@ -9,6 +9,7 @@
 #include "../IOListener.h"
 #include "../IOProvider.h"
 #include "../ISerialPort.h"
+#include "../JSON.h"
 #include "../SimpleEventApp.h"
 #include "../SimpleLogger.h"
 #include "../ThreadRunner.h"
@@ -176,12 +177,12 @@ TEST_F(SimpleEventAppTest, Logging)
 
 TEST_F(SimpleEventAppTest, IOProviderInstantiation)
 {
-    ayisakov::framework::IOProvider provider;
+    ayisakov::framework::IOProvider provider(nullptr);
 }
 
 TEST_F(SimpleEventAppTest, IOProviderSerialPortCreation)
 {
-    ayisakov::framework::IOProvider provider;
+    ayisakov::framework::IOProvider provider(nullptr);
     ayisakov::framework::ISerialPort *pPort1 = nullptr;
     pPort1 = provider.getSerialPort();
     ASSERT_FALSE(pPort1 == nullptr);
@@ -215,7 +216,7 @@ TEST_F(SimpleEventAppTest, IOListenerInstantiation)
     ASSERT_FALSE(pListener->isRunning());
 
     // Create an I/O provider and make the listener a subscriber
-    std::unique_ptr<ayif::IIOProvider> pProvider(new ayif::IOProvider());
+    std::unique_ptr<ayif::IIOProvider> pProvider(new ayif::IOProvider(nullptr));
     ASSERT_TRUE(pProvider.get());
     ASSERT_EQ(pListener->subscribe(pProvider.get()), 0);
 
@@ -249,13 +250,48 @@ TEST_F(SimpleEventAppTest, IOListenerInstantiation)
 TEST_F(SimpleEventAppTest, IOListenerIOProviderSafeDestruction)
 {
     // reverse construction and destruction order with subscribed listener
-    std::unique_ptr<ayif::IIOProvider> pProvider(new ayif::IOProvider());
+    std::unique_ptr<ayif::IIOProvider> pProvider(new ayif::IOProvider(nullptr));
     std::unique_ptr<ayif::IIOListener> pListener1(
         new ayif::IOListener(pProvider.get()));
     // Listener destruction should be safe and allow another listener to subscribe.
     std::unique_ptr<ayif::IIOListener> pListener2(new ayif::IOListener());
     pListener1.reset();
     ASSERT_EQ(pListener2->subscribe(pProvider.get()), 0);
+}
+TEST_F(SimpleEventAppTest, JSONParsing)
+{
+    std::string name("RheoRaman configuration file");
+    std::string author("Artem Isakov");
+    std::string version("20181130");
+    int test_int(5);
+    double test_flt(3.14);
+    std::ostringstream oss;
+    oss << "{ \"file_info\":{\"name\":\"" << name
+        << "\",\"author\":\"" << author << "\",\"version\":\""
+        << version << "\",\"integer\":" << test_int
+        << ",\"float\":" << test_flt << "} }";
+    std::string jsonStr = oss.str();
+    ayif::JSON json(jsonStr);
+    //ASSERT_STREQ(jsonStr.c_str(), json.toJSON().c_str());
+    std::string nameOut =
+        json.valueAsString({ "file_info", "name" });
+    std::string authorOut =
+        json.valueAsString({ "file_info", "author" });
+    std::string versionOut = json.valueAsString({ "file_info", "version" });
+    //std::string intOutStr =
+    //    json.valueAsString({ "file_info", "integer" });
+    //std::istringstream is(intOutStr);
+    //int intOut = 0;
+    //is >> intOut;
+    //std::string floatOutStr = json.valueAsString({ "file_info", "float" });
+    //is.str(floatOutStr);
+    //double floatOut = 0.0;
+    //is >> floatOut;
+    ASSERT_STREQ(name.c_str(), nameOut.c_str());
+    ASSERT_STREQ(author.c_str(), authorOut.c_str());
+    ASSERT_STREQ(version.c_str(), versionOut.c_str());
+    //ASSERT_EQ(test_int, intOut);
+    //ASSERT_NEAR(test_flt, floatOut, 0.0001);
 }
 } // namespace
 

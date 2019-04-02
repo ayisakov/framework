@@ -12,7 +12,7 @@ class IJSONConvertible
   public:
     IJSONConvertible() {}
 
-    virtual void ~IJSONConvertible() {}
+    virtual ~IJSONConvertible() {}
 
     /**
      * Load object state from JSON string

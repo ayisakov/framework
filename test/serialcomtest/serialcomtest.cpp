@@ -48,7 +48,7 @@ std::string translateChar(char c)
     if(c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
         return std::string(&c, 1);
     }
-	
+
 	if(c == '\n') {
         return "\\n";
     }
@@ -85,7 +85,7 @@ int main(int argc, char **argv, char *envp[])
         return -1;
     }
     // Instantiate IOProvider
-    ayif::IOProvider provider;
+    ayif::IOProvider provider(nullptr);
 
     // Instantiate IOListener and subscribe
     ayif::IOListener listener;
