@@ -37,9 +37,22 @@ class JSON : public IJSONConvertible
     virtual std::string toJSON() const override;
 
     /**
-     * @throw not_found exception if not found
+     * @throw exception if not found
      */
     virtual std::string valueAsString(const std::list<std::string> &path);
+
+    /**
+     * @throw exception if not found
+     */
+    virtual int valueAsInt(const std::list<std::string> &path);
+
+    /**
+     * @throw exception if not found
+     */
+    virtual double valueAsDouble(const std::list<std::string> &path);
+
+  protected:
+    nlohmann::json *getDeepestObject(const std::list<std::string> &path);
 
   private:
     nlohmann::json m_json;

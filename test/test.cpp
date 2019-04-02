@@ -272,26 +272,18 @@ TEST_F(SimpleEventAppTest, JSONParsing)
         << ",\"float\":" << test_flt << "} }";
     std::string jsonStr = oss.str();
     ayif::JSON json(jsonStr);
-    //ASSERT_STREQ(jsonStr.c_str(), json.toJSON().c_str());
     std::string nameOut =
         json.valueAsString({ "file_info", "name" });
     std::string authorOut =
         json.valueAsString({ "file_info", "author" });
     std::string versionOut = json.valueAsString({ "file_info", "version" });
-    //std::string intOutStr =
-    //    json.valueAsString({ "file_info", "integer" });
-    //std::istringstream is(intOutStr);
-    //int intOut = 0;
-    //is >> intOut;
-    //std::string floatOutStr = json.valueAsString({ "file_info", "float" });
-    //is.str(floatOutStr);
-    //double floatOut = 0.0;
-    //is >> floatOut;
+    int intOut = json.valueAsInt({"file_info", "integer"});
+    double floatOut = json.valueAsDouble({"file_info", "float"});
     ASSERT_STREQ(name.c_str(), nameOut.c_str());
     ASSERT_STREQ(author.c_str(), authorOut.c_str());
     ASSERT_STREQ(version.c_str(), versionOut.c_str());
-    //ASSERT_EQ(test_int, intOut);
-    //ASSERT_NEAR(test_flt, floatOut, 0.0001);
+    ASSERT_EQ(test_int, intOut);
+    ASSERT_NEAR(test_flt, floatOut, 0.0001);
 }
 } // namespace
 
