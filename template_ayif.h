@@ -10,7 +10,7 @@ class Name
 {
   public:
     Name();
-    virtual void ~Name();
+    virtual ~Name();
 };
 } // namespace framework
 } // namespace ayisakov
