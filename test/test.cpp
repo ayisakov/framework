@@ -9,12 +9,12 @@
 #include "../IOListener.h"
 #include "../IOProvider.h"
 #include "../ISerialPort.h"
-#include "../JSON.h"
 #include "../SimpleEventApp.h"
 #include "../SimpleLogger.h"
 #include "../ThreadRunner.h"
 #include "TestApp.h"
 #include "TestMessages.h"
+#include "../TestArgument.h"
 
 
 typedef std::unique_ptr<std::string> TestMessage;
@@ -258,32 +258,67 @@ TEST_F(SimpleEventAppTest, IOListenerIOProviderSafeDestruction)
     pListener1.reset();
     ASSERT_EQ(pListener2->subscribe(pProvider.get()), 0);
 }
-TEST_F(SimpleEventAppTest, JSONParsing)
+//TEST_F(SimpleEventAppTest, JSONParsing)
+//{
+//    std::string name("RheoRaman configuration file");
+//    std::string author("Artem Isakov");
+//    std::string version("20181130");
+//    int test_int(5);
+//    double test_flt(3.14);
+//    std::ostringstream oss;
+//    oss << "{ \"file_info\":{\"name\":\"" << name
+//        << "\",\"author\":\"" << author << "\",\"version\":\""
+//        << version << "\",\"integer\":" << test_int
+//        << ",\"float\":" << test_flt << "} }";
+//    std::string jsonStr = oss.str();
+//    ayif::JSON json(jsonStr);
+//    std::string nameOut =
+//        json.valueAsString({ "file_info", "name" });
+//    std::string authorOut =
+//        json.valueAsString({ "file_info", "author" });
+//    std::string versionOut = json.valueAsString({ "file_info", "version" });
+//    int intOut = json.valueAsInt({"file_info", "integer"});
+//    double floatOut = json.valueAsDouble({"file_info", "float"});
+//    ASSERT_STREQ(name.c_str(), nameOut.c_str());
+//    ASSERT_STREQ(author.c_str(), authorOut.c_str());
+//    ASSERT_STREQ(version.c_str(), versionOut.c_str());
+//    ASSERT_EQ(test_int, intOut);
+//    ASSERT_NEAR(test_flt, floatOut, 0.0001);
+//}
+
+TEST_F(SimpleEventAppTest, CmdLineArguments)
 {
-    std::string name("RheoRaman configuration file");
-    std::string author("Artem Isakov");
-    std::string version("20181130");
-    int test_int(5);
-    double test_flt(3.14);
-    std::ostringstream oss;
-    oss << "{ \"file_info\":{\"name\":\"" << name
-        << "\",\"author\":\"" << author << "\",\"version\":\""
-        << version << "\",\"integer\":" << test_int
-        << ",\"float\":" << test_flt << "} }";
-    std::string jsonStr = oss.str();
-    ayif::JSON json(jsonStr);
-    std::string nameOut =
-        json.valueAsString({ "file_info", "name" });
-    std::string authorOut =
-        json.valueAsString({ "file_info", "author" });
-    std::string versionOut = json.valueAsString({ "file_info", "version" });
-    int intOut = json.valueAsInt({"file_info", "integer"});
-    double floatOut = json.valueAsDouble({"file_info", "float"});
-    ASSERT_STREQ(name.c_str(), nameOut.c_str());
-    ASSERT_STREQ(author.c_str(), authorOut.c_str());
-    ASSERT_STREQ(version.c_str(), versionOut.c_str());
-    ASSERT_EQ(test_int, intOut);
-    ASSERT_NEAR(test_flt, floatOut, 0.0001);
+    using ArgBase = ayif::IArgument<ayif::TestArgTarget>;
+    const std::string arg_short("t");
+    const std::string arg_long("-test");
+    const std::string arg_unrecognized("tree");
+    const int input_short_int = 500;
+    const int input_long_int = 122;
+    const std::string input_short_string = "Marco";
+    const std::string input_long_string = "Polo";
+
+    std::unique_ptr<ArgBase> pArgS(ArgBase::getArgument(arg_short));
+    ASSERT_TRUE(pArgS);
+    std::unique_ptr<ArgBase> pArgL(ArgBase::getArgument(arg_long));
+    ASSERT_TRUE(pArgL);
+    std::unique_ptr<ArgBase> pArgU(ArgBase::getArgument(arg_unrecognized));
+    ASSERT_FALSE(pArgU);
+
+    ayif::TestArgTarget targetS;
+    ayif::TestArgTarget targetL;
+
+    ASSERT_EQ(pArgS->addValue(std::to_string(input_short_int)), 1);
+    ASSERT_EQ(pArgS->addValue(input_short_string), 0);
+    pArgS->apply(&targetS);
+
+    ASSERT_EQ(pArgL->addValue(std::to_string(input_long_int)), 1);
+    ASSERT_EQ(pArgL->addValue(input_long_string), 0);
+    pArgL->apply(&targetL);
+
+    ASSERT_EQ(targetS.getIntVal(), input_short_int);
+    ASSERT_STREQ(targetS.getStringVal().c_str(), input_short_string.c_str());
+    ASSERT_EQ(targetL.getIntVal(), input_long_int);
+    ASSERT_STREQ(targetL.getStringVal().c_str(), input_long_string.c_str());
 }
 } // namespace
 

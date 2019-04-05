@@ -10,7 +10,7 @@ set(framework_test_SOURCES
   ../SerialPort.cpp
   ../IOListener.cpp
   ../RelTimerMs.cpp
-  ../JSON.cpp
+  ../TestArgument.cpp
   test.cpp)
 add_subdirectory(serialcomtest)
 add_executable(framework_test ${framework_test_SOURCES})
