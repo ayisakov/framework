@@ -78,6 +78,10 @@ template <typename Target> class IArgument
      * can be used to apply the argument.
      */
     virtual int addValue(const std::string &value) = 0;
+    virtual int addValue(const char *value)
+    {
+        return addValue(std::string(value));
+    }
 
     /**
      * Apply the argument, i.e. perform the action associated
@@ -89,6 +93,13 @@ template <typename Target> class IArgument
      * @throw missing_target if a required target was not provided
      */
     virtual void apply(Target *pTarget) = 0;
+
+    /**
+     * Convenience function for immediate application of a
+     * single argument. There is no need to call addValue
+     * when using this function. See void apply(Target *pTarget).
+     */
+    //    virtual void apply(const std::string &value, Target *pTarget) = 0;
 
     /**
      * Get argument, given the key. Ownership is transferred to
@@ -104,6 +115,16 @@ template <typename Target> class IArgument
         }
         return fret->second();
     }
+
+    /**
+     * Get the short usage string associated with this argument
+     */
+    virtual const char *usage() const { return "default usage"; }
+
+    /**
+     * Get the (usually) longer help string associated with the argument
+     */
+    virtual const char *help() const { return "default help"; }
 
   protected:
     static void registerArg(const std::string &key, creator spawn)
