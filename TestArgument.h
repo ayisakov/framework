@@ -2,35 +2,13 @@
 #define TESTARGUMENT_H
 
 #include <boost/optional.hpp>
-#include "IArgument.h"
+//#include "IArgument.h"
+#include "TestArgBase.h"
 
 namespace ayisakov
 {
 namespace framework
 {
-class TestArgTarget
-{
-  public:
-    TestArgTarget() : m_valueInt(-1) {}
-    ~TestArgTarget() {}
-    void setValues(int valueInt, const std::string &valueString)
-    {
-        m_valueInt = valueInt;
-        m_valueString = valueString;
-    }
-    int getIntVal() const { return m_valueInt; }
-    const std::string &getStringVal() const
-    {
-        return m_valueString;
-    }
-
-  private:
-    int m_valueInt;
-    std::string m_valueString;
-};
-
-using TestArgBase = IArgument<TestArgTarget>;
-
 class TestArgument : public TestArgBase
 {
   public:

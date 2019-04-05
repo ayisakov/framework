@@ -1,12 +1,9 @@
+#include "TestArgTarget.h"
 #include "TestArgument.h"
 #include <stdlib.h>
 
 namespace ayif = ayisakov::framework;
 
-// The map must be instantiated by the base non-template
-// IArgument-derived class.
-template<>
-ayif::TestArgBase::ArgStore ayif::TestArgBase::args {};
 
 static const std::string key_short = "t";
 static const std::string key_long = "-test";

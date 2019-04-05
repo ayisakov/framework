@@ -15,6 +15,7 @@
 #include "TestApp.h"
 #include "TestMessages.h"
 #include "../TestArgument.h"
+#include "../TestArgTarget.h"
 
 
 typedef std::unique_ptr<std::string> TestMessage;
