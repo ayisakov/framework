@@ -132,6 +132,7 @@ template <typename Target> class IArgument
         args[key] = spawn;
     }
 
+  public: // not necessary with GCC, but for some reason MSVC cannot compile otherwise
     template <typename Derived> class Registrar
     {
       public:
