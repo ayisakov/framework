@@ -2,6 +2,7 @@
 #define AYI_IARGUMENT_H
 
 #include <exception>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -109,8 +110,8 @@ template <typename Target> class IArgument
      */
     static IArgument *getArgument(const std::string &key)
     {
-        typename ArgStore::const_iterator fret = args.find(key);
-        if(fret == args.end()) {
+        typename ArgStore::const_iterator fret = args().find(key);
+        if(fret == args().end()) {
             return nullptr;
         }
         return fret->second();
@@ -129,7 +130,7 @@ template <typename Target> class IArgument
   protected:
     static void registerArg(const std::string &key, creator spawn)
     {
-        args[key] = spawn;
+        args()[key] = spawn;
     }
 
   public: // not necessary with GCC, but for some reason MSVC cannot compile otherwise
@@ -144,9 +145,14 @@ template <typename Target> class IArgument
     };
 
   private:
-    static ArgStore args;
+	// This is required to overcome the static initialization order problem
+    static ArgStore &args()
+    {
+        static std::unique_ptr<ArgStore> store(new ArgStore());
+        return *store;
+    }
 };
 } // namespace framework
-} // namespace ayisakov
+} // namespace framework
 
 #endif // AYI_IARGUMENT_H
