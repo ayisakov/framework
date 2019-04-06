@@ -110,8 +110,8 @@ template <typename Target> class IArgument
      */
     static IArgument *getArgument(const std::string &key)
     {
-        typename ArgStore::const_iterator fret = args().find(key);
-        if(fret == args().end()) {
+        typename ArgStore::const_iterator fret = args()->find(key);
+        if(fret == args()->end()) {
             return nullptr;
         }
         return fret->second();
@@ -130,29 +130,87 @@ template <typename Target> class IArgument
   protected:
     static void registerArg(const std::string &key, creator spawn)
     {
-        args()[key] = spawn;
+        ArgStore *pStore = args(1);
+        auto fret = pStore->find(key);
+        if(fret != pStore->end()) {
+            args(-1);
+            throw std::runtime_error(
+                "Attempted to register the already registered "
+                "argument \"" +
+                key + "\".");
+        }
+        pStore->operator[](key) = spawn;
+    }
+
+    static void unregisterArg(const std::string &key)
+    {
+        ArgStore *pStore = args();
+        if(!pStore) {
+            throw std::runtime_error(
+                "Attempted to unregister argument \"" + key +
+                "\" but no "
+                "argument store exists.");
+        }
+        auto fret = pStore->find(key);
+        if(fret != pStore->end()) {
+            pStore->erase(fret);
+            args(-1);
+        }
     }
 
   public: // not necessary with GCC, but for some reason MSVC cannot compile otherwise
     template <typename Derived> class Registrar
     {
       public:
-        Registrar(const std::string &key)
+        Registrar(const std::string &key) : mr_key(key)
         {
             IArgument<Target>::registerArg(key, &Derived::create);
         }
-        ~Registrar() {}
+        ~Registrar()
+        {
+            IArgument<Target>::unregisterArg(mr_key);
+        }
+        Registrar(const Registrar &original) = delete;
+
+      private:
+        const std::string &mr_key;
     };
 
   private:
-	// This is required to overcome the static initialization order problem
-    static ArgStore &args()
+    /**
+     * Reference-counted initialization on fist use
+     * This is required to overcome the static initialization order fiasco.
+     * Normal usage of this function does not change the refcount.
+     * Registering an argument should inrement the refcount.
+     * Unregistering an argument should decrement the refcount.
+     * When the refcount goes to 0, the map is deleted and this
+     * function will return a null pointer.
+     */
+    static ArgStore *args(int refCountChange = 0)
     {
-        static std::unique_ptr<ArgStore> store(new ArgStore());
-        return *store;
+        if(refCountChange < -1 || refCountChange > 1) {
+            throw std::out_of_range("Invalid refcount change " +
+                                    std::to_string(refCountChange) + ".");
+        }
+        static int refCount(0); // initialized only once
+        static ArgStore *pStore(nullptr); // initialized only once
+        if(refCount == 0 && refCountChange > 0) {
+            if(pStore) {
+                throw std::runtime_error(
+                    "ArgStore exists but is not expected to "
+                    "exist.");
+            }
+            pStore = new ArgStore();
+        }
+        refCount += refCountChange;
+        if(refCount == 0) {
+            delete pStore;
+            pStore = nullptr;
+        }
+        return pStore;
     }
 };
 } // namespace framework
-} // namespace framework
+} // namespace ayisakov
 
 #endif // AYI_IARGUMENT_H
