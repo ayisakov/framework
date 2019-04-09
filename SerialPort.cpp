@@ -37,6 +37,9 @@ int ayisakov::framework::SerialPort::open(const std::string &device,
         m_port.open(device);
         m_port.set_option(boost::asio::serial_port_base::baud_rate(baudRate));
     } catch(boost::system::system_error &e) {
+        log("Failed to open serial port \"" + device +
+            "\" with baud rate " + std::to_string(baudRate)
+			+ ":" + std::string(e.what()));
         return -1;
     }
     return 0;
@@ -49,6 +52,7 @@ int ayisakov::framework::SerialPort::close()
     try {
         m_port.close();
     } catch(boost::system::system_error &e) {
+        log("Failed to close serial port: " + std::string(e.what()));
         return -1;
     }
     return 0;
@@ -131,6 +135,7 @@ int ayisakov::framework::SerialPort::writeSync(IWriteBuffer &writeBuf)
             return -1;
         }
     } catch(std::exception &e) {
+        log("Serial port synchronous write failed: " + std::string(e.what()));
         return -1;
     }
     return 0;
@@ -193,6 +198,8 @@ int ayisakov::framework::SerialPort::readSync(IReadBuffer &readBuf)
                           boost::asio::buffer(readBuf.contents(),
                                               readBuf.length()));
     } catch(std::exception &e) {
+        log("Serial port synchronous read operation failed: " +
+            std::string(e.what()));
         return -1;
     }
     return 0;

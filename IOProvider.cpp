@@ -56,6 +56,7 @@ void ayisakov::framework::IOProvider::release(const std::string &portId)
         // TODO: add maximum number of unused ports to keep around
         m_unused.insert(id);
     } catch(const std::out_of_range &e) {
+        log("Unable to release serial port: " + std::string(e.what()));
         return;
     }
 }
