@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <list>
+#include <sstream>
 
 namespace ayisakov
 {
@@ -52,7 +54,29 @@ template <typename Target> class IArgument
 
 
   public:
-    using ArgStore = std::unordered_map<std::string, creator>;
+    class ArgRecord
+    {
+      public:
+        ArgRecord(std::list<std::string> keys, creator spawner,
+                         const char *usage, const char *help)
+            : m_keys(keys), m_spawner(spawner), m_usage(usage), m_help(help)
+        {}
+        ~ArgRecord() {}
+        std::list<std::string> m_keys; // argument strings, including all aliases
+        creator m_spawner;   // factory method
+        const char *m_usage; // short usage string
+        const char *m_help;  // longer help string
+    };
+    using ArgFactory = std::unordered_map<std::string, creator>; // key, factory method
+    using ArgInfo = std::unordered_map<creator, ArgRecord>; // (unique) factory method, record
+    class ArgStore
+    {
+    public:
+        ArgStore() {}
+        ~ArgStore() {}
+        ArgFactory creators;
+        ArgInfo info;
+    };
     enum ArgType {
         ARG_TYPE_INT,
         ARG_TYPE_BOOL,
@@ -110,8 +134,9 @@ template <typename Target> class IArgument
      */
     static IArgument *getArgument(const std::string &key)
     {
-        typename ArgStore::const_iterator fret = args()->find(key);
-        if(fret == args()->end()) {
+        ArgFactory &creators = args()->creators;
+        typename ArgFactory::const_iterator fret = creators.find(key);
+        if(fret == creators.end()) {
             return nullptr;
         }
         return fret->second();
@@ -127,53 +152,133 @@ template <typename Target> class IArgument
      */
     virtual const char *help() const { return "default help"; }
 
-  protected:
-    static void registerArg(const std::string &key, creator spawn)
+    enum EArgInfo {
+        EARGINFOHELP = 0,
+        EARGINFOUSAGE
+    };
+
+    /**
+     * Get usage information from all registered arguments
+     */
+    static std::string usageAll()
     {
-        ArgStore *pStore = args(1);
-        auto fret = pStore->find(key);
-        if(fret != pStore->end()) {
-            args(-1);
-            throw std::runtime_error(
-                "Attempted to register the already registered "
-                "argument \"" +
-                key + "\".");
-        }
-        pStore->operator[](key) = spawn;
+        return printAll(EArgInfo::EARGINFOUSAGE);
     }
 
-    static void unregisterArg(const std::string &key)
+    /**
+     * Get help information from all registered arguments
+     */
+    static std::string helpAll()
+    {
+        return printAll(EArgInfo::EARGINFOHELP);
+    }
+
+    static std::string printAll(EArgInfo whichInfo)
+    {
+        std::ostringstream oss;
+        ArgStore *pStore = args();
+        if(!pStore) {
+            throw std::runtime_error(
+                "Attempting to dump argument information "
+                "without an argument store.");
+        }
+        ArgInfo &info = pStore->info;
+        for(const auto &argpair : info) {
+            const ArgRecord &arg = argpair.second;
+            int keyCount = 0;
+            for(const auto &key : arg.m_keys) {
+                if(++keyCount > 1) {
+                    oss << " or ";
+                }
+                oss << "-" << key;
+            }
+            oss << " ";
+            switch (whichInfo) {
+            case EARGINFOHELP:
+                if(arg.m_help) {
+                    oss << arg.m_help;
+                }
+                break;
+            case EARGINFOUSAGE:
+                if(arg.m_usage) {
+                    oss << arg.m_usage;
+                }
+                break;
+            default:
+                throw std::runtime_error(
+                    "Unrecognized argument information enum "
+                    "value " +
+                    std::to_string(int(whichInfo)));
+                break;
+            }
+            oss << std::endl;
+        }
+        return oss.str();
+    }
+
+  protected:
+    static void registerArg(const ArgRecord &rec)
+    {
+        if(!rec.m_spawner) {
+            throw std::runtime_error(
+                "Attempted to register argument with a null "
+                "creator pointer");
+        }
+        ArgStore *pStore = args(1);
+        ArgFactory &creators = pStore->creators;
+        ArgInfo &info = pStore->info;
+        for(const auto &key : rec.m_keys) {
+            auto fret = creators.find(key);
+            if(fret != creators.end()) {
+                args(-1);
+                throw std::runtime_error(
+                    "Attempted to register the already registered "
+                    "argument \"" +
+                    key + "\".");
+            }
+            creators[key] = rec.m_spawner;
+        }
+        //        info[rec.m_spawner] = rec;
+        info.emplace(rec.m_spawner, rec);
+    }
+
+    static void unregisterArg(const ArgRecord &arg)
     {
         ArgStore *pStore = args();
         if(!pStore) {
             throw std::runtime_error(
-                "Attempted to unregister argument \"" + key +
-                "\" but no "
+                "Attempted to unregister argument"
+                " but no "
                 "argument store exists.");
         }
-        auto fret = pStore->find(key);
-        if(fret != pStore->end()) {
-            pStore->erase(fret);
+        ArgFactory &creators = pStore->creators;
+        ArgInfo &info = pStore->info;
+        auto fret = info.find(arg.m_spawner);
+        if(fret != info.end()) {
+            for(const auto &key : arg.m_keys) {
+                creators.erase(key);
+            }
+            info.erase(fret);
             args(-1);
         }
     }
 
   public: // not necessary with GCC, but for some reason MSVC cannot compile otherwise
-    template <typename Derived> class Registrar
+    /*template <typename Derived> */class Registrar
     {
       public:
-        Registrar(const std::string &key) : mr_key(key)
+        Registrar(const ArgRecord &rec) : m_rec(rec)
         {
-            IArgument<Target>::registerArg(key, &Derived::create);
+            IArgument<Target>::registerArg(rec);
         }
         ~Registrar()
         {
-            IArgument<Target>::unregisterArg(mr_key);
+            IArgument<Target>::unregisterArg(m_rec);
         }
         Registrar(const Registrar &original) = delete;
 
       private:
-        const std::string &mr_key;
+        ArgRecord m_rec;
     };
 
   private:

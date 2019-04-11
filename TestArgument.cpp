@@ -7,12 +7,14 @@ namespace ayif = ayisakov::framework;
 
 static const std::string key_short = "t";
 static const std::string key_long = "-test";
+static const char *help_string = "Sample help string";
+static const char *usage_string = "Sample usage string";
 const int values_required = 2;
 
-ayif::TestArgBase::Registrar<ayif::TestArgument>
-    reg_short(key_short);
-ayif::TestArgBase::Registrar<ayif::TestArgument>
-    reg_long(key_long);
+ayif::TestArgBase::Registrar
+reg_this(ayif::TestArgBase::ArgRecord({ key_short, key_long },
+                                      &ayif::TestArgument::create, usage_string,
+                                      help_string));
 
 ayif::TestArgument::TestArgument() : m_valuesProvided(0) {}
 
@@ -47,4 +49,14 @@ void ayif::TestArgument::apply(ayif::TestArgTarget *pTarget)
         throw missing_values(key_long, m_valuesProvided, values_required);
     }
     pTarget->setValues(*m_valueInt, *m_valueString);
+}
+
+const char *ayif::TestArgument::usage() const
+{
+    return usage_string;
+}
+
+const char *ayif::TestArgument::help() const
+{
+    return help_string;
 }

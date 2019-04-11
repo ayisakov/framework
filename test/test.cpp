@@ -11,11 +11,11 @@
 #include "../ISerialPort.h"
 #include "../SimpleEventApp.h"
 #include "../SimpleLogger.h"
+#include "../TestArgTarget.h"
+#include "../TestArgument.h"
 #include "../ThreadRunner.h"
 #include "TestApp.h"
 #include "TestMessages.h"
-#include "../TestArgument.h"
-#include "../TestArgTarget.h"
 
 
 typedef std::unique_ptr<std::string> TestMessage;
@@ -259,7 +259,7 @@ TEST_F(SimpleEventAppTest, IOListenerIOProviderSafeDestruction)
     pListener1.reset();
     ASSERT_EQ(pListener2->subscribe(pProvider.get()), 0);
 }
-//TEST_F(SimpleEventAppTest, JSONParsing)
+// TEST_F(SimpleEventAppTest, JSONParsing)
 //{
 //    std::string name("RheoRaman configuration file");
 //    std::string author("Artem Isakov");
@@ -297,6 +297,12 @@ TEST_F(SimpleEventAppTest, CmdLineArguments)
     const int input_long_int = 122;
     const std::string input_short_string = "Marco";
     const std::string input_long_string = "Polo";
+    const char *input_help_string = "Sample help string";
+    const char *input_usage_string = "Sample usage string";
+    const std::string base_expected("-" + arg_short + " or -" +
+                                    arg_long + std::string(" "));
+    const std::string help_all_expected(base_expected + input_help_string + "\n");
+    const std::string usage_all_expected(base_expected + input_usage_string + "\n");
 
     std::unique_ptr<ArgBase> pArgS(ArgBase::getArgument(arg_short));
     ASSERT_TRUE(pArgS);
@@ -317,9 +323,21 @@ TEST_F(SimpleEventAppTest, CmdLineArguments)
     pArgL->apply(&targetL);
 
     ASSERT_EQ(targetS.getIntVal(), input_short_int);
-    ASSERT_STREQ(targetS.getStringVal().c_str(), input_short_string.c_str());
+    ASSERT_STREQ(targetS.getStringVal().c_str(),
+                 input_short_string.c_str());
     ASSERT_EQ(targetL.getIntVal(), input_long_int);
-    ASSERT_STREQ(targetL.getStringVal().c_str(), input_long_string.c_str());
+    ASSERT_STREQ(targetL.getStringVal().c_str(),
+                 input_long_string.c_str());
+
+    ASSERT_STREQ(pArgS->help(), input_help_string);
+    ASSERT_STREQ(pArgS->usage(), input_usage_string);
+    ASSERT_STREQ(pArgL->help(), input_help_string);
+    ASSERT_STREQ(pArgL->usage(), input_usage_string);
+
+    std::string helpAllArgs = ArgBase::helpAll();
+    ASSERT_STREQ(helpAllArgs.c_str(), help_all_expected.c_str());
+    std::string usageAllArgs = ArgBase::usageAll();
+    ASSERT_STREQ(usageAllArgs.c_str(), usage_all_expected.c_str());
 }
 } // namespace
 

@@ -18,6 +18,8 @@ class TestArgument : public TestArgBase
     virtual bool isStandalone() const override;
     virtual int addValue(const std::string &value) override;
     virtual void apply(TestArgTarget *pTarget) override;
+    virtual const char *usage() const override;
+    virtual const char *help() const override;
     //    virtual void apply(const std::string &value, TestArgTarget *pTarget) override;
 
   private:
