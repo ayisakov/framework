@@ -198,11 +198,13 @@ template <typename Target> class IArgument
                 if(arg.m_help) {
                     oss << arg.m_help;
                 }
+                oss << std::endl;
                 break;
             case EARGINFOUSAGE:
                 if(arg.m_usage) {
                     oss << arg.m_usage;
                 }
+                oss << " ";
                 break;
             default:
                 throw std::runtime_error(
@@ -211,7 +213,6 @@ template <typename Target> class IArgument
                     std::to_string(int(whichInfo)));
                 break;
             }
-            oss << std::endl;
         }
         return oss.str();
     }

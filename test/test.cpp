@@ -302,7 +302,7 @@ TEST_F(SimpleEventAppTest, CmdLineArguments)
     const std::string base_expected("-" + arg_short + " or -" +
                                     arg_long + std::string(" "));
     const std::string help_all_expected(base_expected + input_help_string + "\n");
-    const std::string usage_all_expected(base_expected + input_usage_string + "\n");
+    const std::string usage_all_expected(base_expected + input_usage_string + " ");
 
     std::unique_ptr<ArgBase> pArgS(ArgBase::getArgument(arg_short));
     ASSERT_TRUE(pArgS);

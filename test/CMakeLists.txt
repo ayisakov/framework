@@ -10,7 +10,6 @@ set(framework_test_SOURCES
   ../SerialPort.cpp
   ../IOListener.cpp
   ../RelTimerMs.cpp
-  ../TestArgBase.cpp
   ../TestArgument.cpp
   test.cpp)
 add_subdirectory(serialcomtest)
