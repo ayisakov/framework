@@ -2,6 +2,7 @@
 #define UNIQUEREADBUFFER_H
 
 #include <memory>
+#include <string>
 #include <vector>
 #include "BufferProxy.h"
 #include "IReadBuffer.h"
